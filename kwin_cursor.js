@@ -79,4 +79,10 @@ workspace.windowRemoved.connect(function (w) {
 });
 workspace.currentDesktopChanged.connect(report);
 workspace.windowActivated.connect(report);
+workspace.windowActivated.connect(function (w) {
+    if (w && w.normalWindow)
+        send("Window", w.resourceClass || "", w.caption || "");
+});
 report();
+if (workspace.activeWindow && workspace.activeWindow.normalWindow)
+    send("Window", workspace.activeWindow.resourceClass || "", workspace.activeWindow.caption || "");

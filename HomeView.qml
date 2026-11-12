@@ -11,6 +11,10 @@ Item {
     property bool menuOpen: menuPopup.visible || palettePopup.visible
     property bool active: false
     property Item overlay: null
+    property string activeClass: ""
+    property string activeTitle: ""
+    signal timerFinished(int minutes)
+    readonly property bool wantsKeyboard: dashboard.wantsKeyboard
     readonly property bool cardHovered: menuHover.hovered || paletteHover.hovered
 
     Component.onCompleted: {
@@ -27,12 +31,22 @@ Item {
         }
     }
 
+    HomeDashboard {
+        id: dashboard
+        width: root.width
+        height: trayRow.y - 14
+        active: root.active
+        activeClass: root.activeClass
+        activeTitle: root.activeTitle
+        onTimerFinished: minutes => root.timerFinished(minutes)
+    }
+
     Rectangle {
         x: 16
         y: trayRow.y - 9
         width: root.width - 32
         height: 1
-        color: "#1affffff"
+        color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.07)
     }
 
     Row {

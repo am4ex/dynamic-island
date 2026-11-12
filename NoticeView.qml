@@ -56,6 +56,14 @@ Item {
             color: Theme.accent
         }
 
+        Eyes {
+            anchors.centerIn: parent
+            visible: root.kind === "timer"
+            eyeWidth: 8
+            eyeHeight: 17
+            gap: 6
+        }
+
         Item {
             anchors.centerIn: parent
             visible: root.kind === "clip"

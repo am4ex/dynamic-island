@@ -12,14 +12,14 @@ ShellRoot {
         margins.top: 0
 
         implicitWidth: 1240
-        implicitHeight: 360
+        implicitHeight: 420
         color: "transparent"
 
         exclusiveZone: 0
 
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.namespace: "dynamic-island"
-        WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+        WlrLayershell.keyboardFocus: island.wantsKeyboard ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
         mask: Region {
             x: island.x

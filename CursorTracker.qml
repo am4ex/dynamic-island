@@ -13,8 +13,12 @@ Item {
     property string layoutCode: ""
     property string layoutName: ""
     property bool layoutKnown: false
+    property string activeClass: ""
+    property string activeTitle: ""
 
     signal moved
+    signal appsRequested
+    signal windowsChanged
     signal layoutSwitched
 
     Process {
@@ -36,7 +40,19 @@ Item {
                         root.layoutSwitched();
                     return;
                 }
+                if (data.startsWith("W ")) {
+                    const body = data.slice(2);
+                    const tab = body.indexOf("\t");
+                    root.activeClass = tab >= 0 ? body.slice(0, tab) : body;
+                    root.activeTitle = tab >= 0 ? body.slice(tab + 1) : "";
+                    return;
+                }
+                if (data === "A") {
+                    root.appsRequested();
+                    return;
+                }
                 if (data.startsWith("F")) {
+                    root.windowsChanged();
                     const rest = data.slice(1).trim();
                     root.fullscreenOutputs = rest === "" ? [] : rest.split(",");
                     return;

@@ -15,6 +15,11 @@ XML = """
       <arg type="i" name="x" direction="in"/>
       <arg type="i" name="y" direction="in"/>
     </method>
+    <method name="OpenApps"/>
+    <method name="Window">
+      <arg type="s" name="cls" direction="in"/>
+      <arg type="s" name="caption" direction="in"/>
+    </method>
     <method name="Fullscreen">
       <arg type="s" name="outputs" direction="in"/>
     </method>
@@ -39,7 +44,13 @@ def unload():
 
 
 def on_call(connection, sender, path, interface, method, params, invocation):
-    if method == "Fullscreen":
+    if method == "Window":
+        cls, caption = params.unpack()
+        clean = caption.replace("\n", " ").replace("\t", " ")
+        sys.stdout.write(f"W {cls}\t{clean}\n")
+    elif method == "OpenApps":
+        sys.stdout.write("A\n")
+    elif method == "Fullscreen":
         (outputs,) = params.unpack()
         sys.stdout.write(f"F {outputs}\n")
     else:

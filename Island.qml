@@ -60,10 +60,32 @@ Item {
     readonly property string mode: expanded ? "expanded" : compactMode
     readonly property bool playerOpen: expanded && tab === "player" && hasMedia
     readonly property bool showPlayer: hasMedia && (mode === "media" || playerOpen)
-    readonly property bool showHome: expanded && !playerOpen
+    readonly property bool showApps: expanded && tab === "apps"
+    readonly property bool showHome: expanded && !playerOpen && !showApps
+    property bool homeWantsKeyboard: false
+    readonly property bool wantsKeyboard: showApps || (showHome && homeWantsKeyboard)
+    property real appsOpenedAt: 0
 
-    readonly property real fullWidth: 560
-    readonly property real fullHeight: 236
+    function openApps() {
+        pinned = true;
+        tab = "apps";
+        appsOpenedAt = Date.now();
+    }
+
+    function closeApps() {
+        pinned = false;
+        if (tab === "apps")
+            tab = "home";
+    }
+
+    property real fullWidth: playerOpen ? 560 : 640
+    property real fullHeight: playerOpen ? 236 : showApps ? 290 : 312
+    Behavior on fullWidth {
+        NumberAnimation { duration: 420; easing.type: Easing.OutBack; easing.overshoot: 0.8 }
+    }
+    Behavior on fullHeight {
+        NumberAnimation { duration: 480; easing.type: Easing.OutBack; easing.overshoot: 0.9 }
+    }
     readonly property real fullRadius: 28
 
     property real compactWidth: !born ? 44 : compactMode === "notice" ? (helloShown ? 190 : 340) : compactMode === "volume" ? 280 : compactMode === "layout" ? 200 : compactMode === "media" ? 270 : 200
@@ -116,7 +138,7 @@ Item {
     property real screenTop: 0
     readonly property bool fullscreenHere: screenName !== "" && cursor.fullscreenOutputs.indexOf(screenName) >= 0
     property bool revealed: false
-    readonly property bool peeking: notice !== null || layoutShown || volumeShown || trayMenuOpen
+    readonly property bool peeking: notice !== null || layoutShown || volumeShown || trayMenuOpen || pinned
     readonly property bool concealed: fullscreenHere && !revealed && !peeking
 
     property real slide: 0
@@ -234,7 +256,7 @@ Item {
         return Qt.hsva(best.hsvHue, Math.min(0.72, best.hsvSaturation * 0.9 + 0.08), Math.min(0.82, Math.max(0.62, best.hsvValue * 0.9)), 1);
     }
     readonly property bool helloShown: notice !== null && notice.kind === "hello"
-    readonly property color edgeColor: compactMode === "notice" ? "#76a043" : accent
+    readonly property color edgeColor: compactMode === "notice" ? (notice && notice.kind === "timer" ? "#e8913a" : Theme.accent) : accent
 
     property real glow: Math.max(waveAmount, compactMode === "notice" && !helloShown ? 1 : 0)
     Behavior on glow {
@@ -287,13 +309,27 @@ Item {
     }
 
     function showVolume() {
-        if (!volumeArmed)
+        if (!volumeArmed || expanded)
             return;
         volumeShown = true;
         volumeTimer.restart();
     }
 
-    onExpandedChanged: if (expanded) tab = playing ? "player" : "home"
+    onExpandedChanged: if (expanded && tab !== "apps") tab = playing ? "player" : "home"
+
+    Connections {
+        target: cursor
+        function onAppsRequested() {
+            if (root.showApps)
+                root.closeApps();
+            else
+                root.openApps();
+        }
+        function onWindowsChanged() {
+            if (root.pinned && root.tab === "apps" && Date.now() - root.appsOpenedAt > 500)
+                root.closeApps();
+        }
+    }
     onHasMediaChanged: if (!hasMedia) pinned = false
     onSinkChanged: volumeArmed = false
     onSinkReadyChanged: {
@@ -374,6 +410,8 @@ Item {
     Connections {
         target: cursor
         function onLayoutSwitched() {
+            if (root.expanded)
+                return;
             root.layoutShown = true;
             layoutTimer.restart();
         }
@@ -469,6 +507,19 @@ Item {
 
         Morph {
             anchors.fill: parent
+            shown: root.showApps
+
+            AppsView {
+                anchors.fill: parent
+                anchors.topMargin: 44
+                active: root.showApps
+                onLaunched: root.closeApps()
+                onCloseRequested: root.closeApps()
+            }
+        }
+
+        Morph {
+            anchors.fill: parent
             shown: root.showHome
 
             HomeView {
@@ -476,6 +527,10 @@ Item {
                 anchors.topMargin: 44
                 active: root.showHome
                 overlay: root
+                activeClass: cursor.activeClass
+                activeTitle: cursor.activeTitle
+                onWantsKeyboardChanged: root.homeWantsKeyboard = wantsKeyboard
+                onTimerFinished: minutes => root.showNotice({ kind: "timer", title: "Время вышло", subtitle: "Таймер · " + minutes + " мин" }, 9000)
                 onMenuOpenChanged: root.trayMenuOpen = menuOpen
                 onCardHoveredChanged: root.cardHovered = cardHovered
             }
@@ -489,11 +544,11 @@ Item {
             visible: opacity > 0
 
             Repeater {
-                model: root.hasMedia ? [{ key: "home", label: "Главная" }, { key: "player", label: "Плеер" }] : [{ key: "home", label: "Главная" }]
+                model: root.hasMedia ? [{ key: "home", label: "Главная" }, { key: "apps", label: "Приложения" }, { key: "player", label: "Плеер" }] : [{ key: "home", label: "Главная" }, { key: "apps", label: "Приложения" }]
 
                 Rectangle {
                     required property var modelData
-                    readonly property bool selected: modelData.key === (root.playerOpen ? "player" : "home")
+                    readonly property bool selected: modelData.key === (root.playerOpen ? "player" : root.showApps ? "apps" : "home")
 
                     width: tabText.implicitWidth + 24
                     height: 26
