@@ -84,6 +84,14 @@ quickshell -p ~/.config/quickshell/island
 ISLAND_SCREEN=HDMI-A-1 quickshell -p ~/.config/quickshell/island
 ```
 
+### Язык
+
+Интерфейс берёт язык системы: русский, если система на русском, иначе английский. Задать вручную:
+
+```bash
+ISLAND_LANG=ru quickshell -p ~/.config/quickshell/island
+```
+
 ## Управление
 
 | Действие | Как |

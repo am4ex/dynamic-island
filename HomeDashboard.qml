@@ -108,7 +108,7 @@ Item {
     }
 
     function connectTo(net, password) {
-        wifiStatus = "Подключение к " + net.ssid + "…";
+        wifiStatus = Tr.t("Подключение к ") + net.ssid + "…";
         let cmd;
         if (savedNets.indexOf(net.ssid) >= 0 && !password)
             cmd = ["nmcli", "con", "up", "id", net.ssid];
@@ -123,7 +123,7 @@ Item {
 
     function pick(net) {
         if (net.inUse) {
-            wifiStatus = "Отключение…";
+            wifiStatus = Tr.t("Отключение…");
             netAction.command = ["nmcli", "con", "down", "id", net.ssid];
             netAction.running = true;
         } else if (net.secure && savedNets.indexOf(net.ssid) < 0) {
@@ -184,7 +184,7 @@ Item {
             id: netErr
         }
         onExited: code => {
-            root.wifiStatus = code === 0 ? "" : "Не получилось подключиться";
+            root.wifiStatus = code === 0 ? "" : Tr.t("Не получилось подключиться");
             wifiReader.running = true;
             netScanner.running = true;
             savedReader.running = true;
@@ -341,7 +341,7 @@ Item {
 
     Process {
         id: updateRunner
-        command: ["konsole", "-e", "sh", "-c", "yay; echo; read -p 'Enter, чтобы закрыть' x"]
+        command: ["konsole", "-e", "sh", "-c", "yay; echo; read -p '" + Tr.t("Enter, чтобы закрыть") + "' x"]
         onExited: updateReader.running = true
     }
 
@@ -464,7 +464,7 @@ Item {
         Text {
             y: timeRow.height + 2
             text: {
-                const s = clock.date.toLocaleDateString(Qt.locale("ru_RU"), "dddd, d MMMM");
+                const s = clock.date.toLocaleDateString(Qt.locale(), Tr.russian ? "dddd, d MMMM" : "dddd, MMMM d");
                 return s.charAt(0).toUpperCase() + s.slice(1);
             }
             color: Theme.dim
@@ -484,7 +484,7 @@ Item {
             model: [
                 { label: "CPU", value: root.cpu + "%", sub: root.cpuTemp + "°" },
                 { label: "GPU", value: Math.round(root.gpu) + "%", sub: root.gpuTemp + "°" },
-                { label: "ОЗУ", value: root.ram + "%", sub: root.ramUsed.toFixed(1) + " / " + Math.round(root.ramTotal) + " ГБ" }
+                { label: Tr.t("ОЗУ"), value: root.ram + "%", sub: root.ramUsed.toFixed(1) + " / " + Math.round(root.ramTotal) + Tr.t(" ГБ") }
             ]
 
             Column {
@@ -529,7 +529,7 @@ Item {
         visible: root.clipPanel
 
         Text {
-            text: "Скопировано"
+            text: Tr.t("Скопировано")
             color: Theme.faint
             font.family: Theme.fontFamily
             font.weight: Font.Bold
@@ -585,7 +585,7 @@ Item {
 
         Text {
             visible: root.clipItems.length === 0
-            text: "Пока пусто"
+            text: Tr.t("Пока пусто")
             color: Theme.faint
             font.family: Theme.fontFamily
             font.weight: Font.Bold
@@ -612,7 +612,7 @@ Item {
         Text {
             x: 52
             y: 6
-            text: root.scanning ? "Поиск сетей…" : root.wifiStatus
+            text: root.scanning ? Tr.t("Поиск сетей…") : root.wifiStatus
             color: Theme.faint
             font.family: Theme.fontFamily
             font.weight: Font.Bold
@@ -740,7 +740,7 @@ Item {
                                 anchors.right: parent.right
                                 anchors.verticalCenter: parent.verticalCenter
                                 visible: netRow.modelData.inUse
-                                text: "отключить"
+                                text: Tr.t("отключить")
                                 color: Theme.faint
                                 font.family: Theme.fontFamily
                                 font.weight: Font.Bold
@@ -789,7 +789,7 @@ Item {
                                 x: 12
                                 anchors.verticalCenter: parent.verticalCenter
                                 visible: passInput.text === ""
-                                text: "Пароль и Enter"
+                                text: Tr.t("Пароль и Enter")
                                 color: Theme.faint
                                 font.family: Theme.fontFamily
                                 font.weight: Font.Bold
@@ -802,7 +802,7 @@ Item {
                 Text {
                     visible: !root.wifiOn
                     topPadding: 20
-                    text: "Wi-Fi выключен"
+                    text: Tr.t("Wi-Fi выключен")
                     color: Theme.faint
                     font.family: Theme.fontFamily
                     font.weight: Font.Bold
@@ -821,7 +821,7 @@ Item {
 
         Text {
             y: 4
-            text: "Уведомления"
+            text: Tr.t("Уведомления")
             color: Theme.accent
             font.family: Theme.fontFamily
             font.weight: Font.ExtraBold
@@ -832,7 +832,7 @@ Item {
             anchors.right: parent.right
             y: 5
             visible: root.notifHistory.length > 0
-            text: "Очистить"
+            text: Tr.t("Очистить")
             color: clearArea.containsMouse ? Theme.dim : Theme.faint
             font.family: Theme.fontFamily
             font.weight: Font.Bold
@@ -933,7 +933,7 @@ Item {
                 Text {
                     visible: root.notifHistory.length === 0
                     topPadding: 24
-                    text: "Новых уведомлений нет"
+                    text: Tr.t("Новых уведомлений нет")
                     color: Theme.faint
                     font.family: Theme.fontFamily
                     font.weight: Font.Bold
@@ -1200,7 +1200,7 @@ Item {
                 Text {
                     anchors.centerIn: parent
                     visible: customInput.text === ""
-                    text: "мин : сек"
+                    text: Tr.t("мин : сек")
                     color: Theme.faint
                     font.family: Theme.fontFamily
                     font.weight: Font.Bold
@@ -1223,7 +1223,7 @@ Item {
                 Text {
                     id: startText
                     anchors.centerIn: parent
-                    text: "Старт"
+                    text: Tr.t("Старт")
                     color: Theme.background
                     font.family: Theme.fontFamily
                     font.weight: Font.ExtraBold
@@ -1263,7 +1263,7 @@ Item {
                     Text {
                         id: chooseText
                         anchors.centerIn: parent
-                        text: parent.modelData > 0 ? parent.modelData + " мин" : "Своё"
+                        text: parent.modelData > 0 ? parent.modelData + Tr.t(" мин") : Tr.t("Своё")
                         color: Theme.accent
                         font.family: Theme.fontFamily
                         font.weight: Font.Bold

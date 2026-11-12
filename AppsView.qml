@@ -69,13 +69,13 @@ Item {
     }
 
     readonly property var groupDefs: [
-        { key: "net", label: "Интернет", cats: ["Network", "WebBrowser", "Email", "Chat", "InstantMessaging"] },
-        { key: "games", label: "Игры", cats: ["Game"] },
-        { key: "media", label: "Медиа и графика", cats: ["AudioVideo", "Audio", "Video", "Graphics", "Player"] },
-        { key: "dev", label: "Разработка", cats: ["Development", "IDE"] },
-        { key: "office", label: "Офис", cats: ["Office"] },
-        { key: "system", label: "Система", cats: ["System", "Settings", "Monitor", "PackageManager"] },
-        { key: "utils", label: "Утилиты", cats: [] }
+        { key: "net", label: Tr.t("Интернет"), cats: ["Network", "WebBrowser", "Email", "Chat", "InstantMessaging"] },
+        { key: "games", label: Tr.t("Игры"), cats: ["Game"] },
+        { key: "media", label: Tr.t("Медиа и графика"), cats: ["AudioVideo", "Audio", "Video", "Graphics", "Player"] },
+        { key: "dev", label: Tr.t("Разработка"), cats: ["Development", "IDE"] },
+        { key: "office", label: Tr.t("Офис"), cats: ["Office"] },
+        { key: "system", label: Tr.t("Система"), cats: ["System", "Settings", "Monitor", "PackageManager"] },
+        { key: "utils", label: Tr.t("Утилиты"), cats: [] }
     ]
 
     function groupOf(e) {
@@ -337,7 +337,7 @@ Item {
             x: search.x
             anchors.verticalCenter: parent.verticalCenter
             visible: root.query === ""
-            text: "Поиск"
+            text: Tr.t("Поиск")
             color: Theme.faint
             font.family: Theme.fontFamily
             font.weight: Font.Bold
@@ -352,13 +352,13 @@ Item {
             visible: !root.searching
 
             ModeButton {
-                label: "Частые"
+                label: Tr.t("Частые")
                 chosen: !root.showAll
                 onPicked: root.showAll = false
             }
 
             ModeButton {
-                label: "Все"
+                label: Tr.t("Все")
                 chosen: root.showAll
                 onPicked: root.showAll = true
             }
@@ -419,7 +419,7 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: 12
-                text: "Все"
+                text: Tr.t("Все")
                 color: Theme.faint
                 font.family: Theme.fontFamily
                 font.weight: Font.Bold
@@ -532,7 +532,7 @@ Item {
             x: (parent.width - width) / 2
             y: 40
             visible: root.results.length === 0
-            text: "Ничего не найдено"
+            text: Tr.t("Ничего не найдено")
             color: Theme.faint
             font.family: Theme.fontFamily
             font.weight: Font.Bold

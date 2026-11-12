@@ -204,7 +204,7 @@ Item {
                     Text {
                         anchors.verticalCenter: parent.verticalCenter
                         width: 44
-                        text: "Текст"
+                        text: Tr.t("Текст")
                         color: Theme.dim
                         font.family: Theme.fontFamily
                         font.weight: Font.Bold
@@ -230,7 +230,7 @@ Item {
                     Text {
                         anchors.verticalCenter: parent.verticalCenter
                         width: 44
-                        text: "Фон"
+                        text: Tr.t("Фон")
                         color: Theme.dim
                         font.family: Theme.fontFamily
                         font.weight: Font.Bold

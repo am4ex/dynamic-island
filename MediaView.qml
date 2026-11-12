@@ -168,7 +168,7 @@ Item {
             Text {
                 font.family: Theme.fontFamily
                 width: parent.width
-                text: root.player ? (root.player.trackTitle || "Неизвестный трек") : ""
+                text: root.player ? (root.player.trackTitle || Tr.t("Неизвестный трек")) : ""
                 color: Theme.accent
                 font.pixelSize: 15
                 font.weight: Font.ExtraBold
@@ -179,7 +179,7 @@ Item {
                 font.family: Theme.fontFamily
                 font.weight: Font.Bold
                 width: parent.width
-                text: root.player ? (root.player.trackArtist || "Неизвестный исполнитель") : ""
+                text: root.player ? (root.player.trackArtist || Tr.t("Неизвестный исполнитель")) : ""
                 color: Theme.dim
                 font.pixelSize: 13
                 elide: Text.ElideRight
@@ -409,7 +409,7 @@ Item {
                 font.weight: Font.Bold
                 anchors.centerIn: parent
                 visible: lyrics.lines.length === 0
-                text: lyrics.status === "loading" ? "Ищу текст…" : "Текст не найден"
+                text: lyrics.status === "loading" ? Tr.t("Ищу текст…") : Tr.t("Текст не найден")
                 color: Theme.faint
                 font.pixelSize: 12
             }
@@ -438,7 +438,7 @@ Item {
                         font.weight: Font.Bold
                         id: chipText
                         anchors.centerIn: parent
-                        text: parent.modelData.identity || "Плеер"
+                        text: parent.modelData.identity || Tr.t("Плеер")
                         color: parent.selected ? Theme.accent : Theme.dim
                         font.pixelSize: 11
                     }

@@ -539,11 +539,11 @@ Item {
     ClipboardWatcher {
         onCopied: text => {
             const clean = text.replace(/\s+/g, " ").trim();
-            root.showNotice({ kind: "clip", title: "Скопировано", subtitle: clean || "Изображение или файл" }, 2500);
+            root.showNotice({ kind: "clip", title: Tr.t("Скопировано"), subtitle: clean || Tr.t("Изображение или файл") }, 2500);
             root.winkCounter = root.winkCounter + 1;
         }
         onScreenshot: path => {
-            root.showNotice({ kind: "shot", title: "Скриншот готов", subtitle: "Скопирован в буфер", image: "file://" + path }, 3500);
+            root.showNotice({ kind: "shot", title: Tr.t("Скриншот готов"), subtitle: Tr.t("Скопирован в буфер"), image: "file://" + path }, 3500);
             root.winkCounter = root.winkCounter + 1;
         }
     }
@@ -560,7 +560,7 @@ Item {
     property bool born: false
     property real splash: 0
 
-    Component.onCompleted: showNotice({ kind: "hello", title: "Привет", subtitle: "", color: Theme.accent }, 2600)
+    Component.onCompleted: showNotice({ kind: "hello", title: Tr.t("Привет"), subtitle: "", color: Theme.accent }, 2600)
 
     Timer {
         running: true
@@ -763,7 +763,7 @@ Item {
                 onWantsKeyboardChanged: root.homeWantsKeyboard = wantsKeyboard
                 onTimerLeftChanged: root.timerLeft = timerLeft
                 onTimerTotalChanged: root.timerTotal = timerTotal
-                onTimerFinished: minutes => root.showNotice({ kind: "timer", title: "Время вышло", subtitle: "Таймер · " + minutes + " мин" }, 9000)
+                onTimerFinished: minutes => root.showNotice({ kind: "timer", title: Tr.t("Время вышло"), subtitle: Tr.t("Таймер · ") + minutes + Tr.t(" мин") }, 9000)
                 onMenuOpenChanged: root.trayMenuOpen = menuOpen
                 onCardHoveredChanged: root.cardHovered = cardHovered
             }
@@ -777,7 +777,7 @@ Item {
             visible: opacity > 0
 
             Repeater {
-                model: root.hasMedia ? [{ key: "home", label: "Главная" }, { key: "apps", label: "Приложения" }, { key: "player", label: "Плеер" }] : [{ key: "home", label: "Главная" }, { key: "apps", label: "Приложения" }]
+                model: root.hasMedia ? [{ key: "home", label: Tr.t("Главная") }, { key: "apps", label: Tr.t("Приложения") }, { key: "player", label: Tr.t("Плеер") }] : [{ key: "home", label: Tr.t("Главная") }, { key: "apps", label: Tr.t("Приложения") }]
 
                 Rectangle {
                     required property var modelData
