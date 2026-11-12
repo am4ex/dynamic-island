@@ -398,7 +398,9 @@ Item {
         const duration = n.urgency === NotificationUrgency.Critical ? 10000 : ms > 0 ? Math.max(3000, Math.min(10000, ms)) : 5500;
         const icon = n.image !== "" ? n.image : Quickshell.iconPath(n.appIcon !== "" ? n.appIcon : n.desktopEntry, true);
         showNotice({ kind: "app", title: plain(n.summary) || n.appName, subtitle: plain(n.body), app: n.appName, icon: icon, ref: n }, duration);
-        notifHistory = [{ title: plain(n.summary) || n.appName, body: plain(n.body), app: n.appName, icon: icon, entry: n.desktopEntry, time: Qt.formatDateTime(new Date(), "h:mm AP") }].concat(notifHistory).slice(0, 30);
+        const all = [{ title: plain(n.summary) || n.appName, body: plain(n.body), app: n.appName, icon: icon, entry: n.desktopEntry, ref: n, time: Qt.formatDateTime(new Date(), "h:mm AP") }].concat(notifHistory);
+        releaseHistory(all.slice(30));
+        notifHistory = all.slice(0, 30);
         notifUnread = notifUnread + 1;
     }
 
@@ -412,15 +414,56 @@ Item {
         return false;
     }
 
+    property var pendingLaunch: null
+
+    function releaseHistory(items) {
+        for (let i = 0; i < items.length; i++) {
+            const r = items[i].ref;
+            if (r && r.tracked)
+                r.dismiss();
+        }
+    }
+
+    function openSource(n, entry, app) {
+        const alive = n && n.tracked;
+        if (alive) {
+            const actions = n.actions || [];
+            const def = actions.find(a => a.identifier === "default") || (actions.length === 1 ? actions[0] : null);
+            if (def)
+                def.invoke();
+            if (n.tracked)
+                n.dismiss();
+        }
+        pendingLaunch = { entry: entry || "", app: app || "" };
+        cursor.activateApp(entry, (app || "").split(" ")[0]);
+    }
+
+    function launchPending() {
+        const p = pendingLaunch;
+        pendingLaunch = null;
+        if (!p)
+            return;
+        const e = (p.entry ? DesktopEntries.byId(p.entry) : null) || (p.app ? DesktopEntries.heuristicLookup(p.app) : null);
+        if (e)
+            e.execute();
+    }
+
+    Connections {
+        target: cursor
+        function onActivationResult(found) {
+            if (found)
+                root.pendingLaunch = null;
+            else
+                root.launchPending();
+        }
+    }
+
     function activateNotification() {
         const n = notice ? notice.ref : null;
         if (!n)
             return;
-        const actions = n.actions || [];
-        const def = actions.find(a => a.identifier === "default") || (actions.length === 1 ? actions[0] : null);
-        if (def)
-            def.invoke();
-        n.dismiss();
+        notifHistory = notifHistory.filter(h => h.ref !== n);
+        openSource(n, n.desktopEntry, n.appName);
         if (!nextNotification())
             notice = null;
     }
@@ -538,9 +581,6 @@ Item {
     Timer {
         id: noticeTimer
         onTriggered: {
-            const n = root.notice ? root.notice.ref : null;
-            if (n)
-                n.expire();
             if (!root.nextNotification())
                 root.notice = null;
         }
@@ -711,8 +751,14 @@ Item {
                 notifUnread: root.notifUnread
                 onHistoryViewed: root.notifUnread = 0
                 onHistoryCleared: {
+                    root.releaseHistory(root.notifHistory);
                     root.notifHistory = [];
                     root.notifUnread = 0;
+                }
+                onHistoryOpened: item => {
+                    root.openSource(item.ref, item.entry, item.app);
+                    root.notifHistory = root.notifHistory.filter(h => h !== item);
+                    root.pinned = false;
                 }
                 onWantsKeyboardChanged: root.homeWantsKeyboard = wantsKeyboard
                 onTimerLeftChanged: root.timerLeft = timerLeft

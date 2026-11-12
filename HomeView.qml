@@ -18,6 +18,7 @@ Item {
     readonly property int timerTotal: dashboard.timerTotal
     signal historyViewed
     signal historyCleared
+    signal historyOpened(var item)
     property var notifHistory: []
     property int notifUnread: 0
     readonly property bool wantsKeyboard: dashboard.wantsKeyboard
@@ -49,6 +50,7 @@ Item {
         notifUnread: root.notifUnread
         onHistoryViewed: root.historyViewed()
         onHistoryCleared: root.historyCleared()
+        onHistoryOpened: item => root.historyOpened(item)
     }
 
     Rectangle {

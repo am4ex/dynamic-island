@@ -36,6 +36,7 @@ Item {
     property int notifUnread: 0
     signal historyViewed
     signal historyCleared
+    signal historyOpened(var item)
     property bool historyPanel: false
 
     onHistoryPanelChanged: {
@@ -885,7 +886,7 @@ Item {
                         Text {
                             x: 32
                             y: 4
-                            width: parent.width - 32 - 64
+                            width: parent.width - 32 - sourceText.width - 10
                             text: historyRow.modelData.title
                             elide: Text.ElideRight
                             color: Theme.accent
@@ -907,9 +908,12 @@ Item {
                         }
 
                         Text {
+                            id: sourceText
                             anchors.right: parent.right
                             y: 5
-                            text: historyRow.modelData.time
+                            width: Math.min(implicitWidth, 150)
+                            elide: Text.ElideLeft
+                            text: (historyRow.modelData.app ? historyRow.modelData.app + " · " : "") + historyRow.modelData.time
                             color: Theme.faint
                             font.family: Theme.fontFamily
                             font.weight: Font.Bold
@@ -921,12 +925,7 @@ Item {
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                const d = historyRow.modelData;
-                                const entry = (d.entry ? DesktopEntries.byId(d.entry) : null) || DesktopEntries.heuristicLookup(d.app);
-                                if (entry)
-                                    entry.execute();
-                            }
+                            onClicked: root.historyOpened(historyRow.modelData)
                         }
                     }
                 }

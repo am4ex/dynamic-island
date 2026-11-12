@@ -21,8 +21,15 @@ Item {
     signal appsRequested
     signal windowsChanged
     signal layoutSwitched
+    signal activationResult(bool found)
+
+    function activateApp(entry, word) {
+        bridge.write("activate\t" + (entry || "").replace(/\s/g, "") + "\t" + (word || "").replace(/\s/g, "") + "\n");
+    }
 
     Process {
+        id: bridge
+        stdinEnabled: true
         command: ["python3", "-I", Quickshell.shellPath("cursor_bridge.py")]
         running: root.active
 
@@ -46,6 +53,10 @@ Item {
                     const tab = body.indexOf("\t");
                     root.activeClass = tab >= 0 ? body.slice(0, tab) : body;
                     root.activeTitle = tab >= 0 ? body.slice(tab + 1) : "";
+                    return;
+                }
+                if (data.startsWith("R ")) {
+                    root.activationResult(data === "R 1");
                     return;
                 }
                 if (data === "A") {
