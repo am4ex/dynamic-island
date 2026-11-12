@@ -46,7 +46,9 @@ function report() {
         if (seen.indexOf(name) >= 0)
             continue;
         seen.push(name);
-        if (w.fullScreen || coversOutput(w))
+        if (w.fullScreen)
+            names.push(name + "!");
+        else if (coversOutput(w))
             names.push(name);
     }
     send("Fullscreen", names.join(","));

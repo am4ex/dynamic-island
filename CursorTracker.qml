@@ -10,6 +10,7 @@ Item {
     property real globalX: 0
     property real globalY: 0
     property var fullscreenOutputs: []
+    property var strictFullscreenOutputs: []
     property string layoutCode: ""
     property string layoutName: ""
     property bool layoutKnown: false
@@ -54,7 +55,9 @@ Item {
                 if (data.startsWith("F")) {
                     root.windowsChanged();
                     const rest = data.slice(1).trim();
-                    root.fullscreenOutputs = rest === "" ? [] : rest.split(",");
+                    const list = rest === "" ? [] : rest.split(",");
+                    root.fullscreenOutputs = list.map(n => n.replace("!", ""));
+                    root.strictFullscreenOutputs = list.filter(n => n.endsWith("!")).map(n => n.replace("!", ""));
                     return;
                 }
                 const parts = data.split(" ");

@@ -64,10 +64,12 @@ Item {
     readonly property bool showApps: expanded && tab === "apps"
     readonly property bool showHome: expanded && !playerOpen && !showApps
     property bool homeWantsKeyboard: false
-    readonly property bool wantsKeyboard: showApps || (showHome && homeWantsKeyboard)
+    readonly property bool wantsKeyboard: !concealed && (showApps || (showHome && homeWantsKeyboard))
     property real appsOpenedAt: 0
 
     function openApps() {
+        if (strictFullscreen)
+            return;
         pinned = true;
         tab = "apps";
         appsOpenedAt = Date.now();
@@ -141,7 +143,8 @@ Item {
     readonly property bool fullscreenHere: screenName !== "" && cursor.fullscreenOutputs.indexOf(screenName) >= 0
     property bool revealed: false
     readonly property bool peeking: notice !== null || layoutShown || volumeShown || trayMenuOpen || pinned
-    readonly property bool concealed: fullscreenHere && !revealed && !peeking
+    readonly property bool strictFullscreen: screenName !== "" && cursor.strictFullscreenOutputs.indexOf(screenName) >= 0
+    readonly property bool concealed: fullscreenHere && (strictFullscreen || (!revealed && !peeking))
 
     property real slide: 0
     property real stretchX: 1
