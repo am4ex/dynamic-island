@@ -12,6 +12,11 @@ Item {
     property bool expanded: false
     property string timeText: ""
     property string layoutBadge: ""
+    property bool cursorKnown: false
+    property point cursor: Qt.point(0, 0)
+    property bool eyesPleased: false
+    property int winkTrigger: 0
+    property int surpriseTrigger: 0
     property var levels: []
     property color accent: "#4cd964"
     property var players: []
@@ -442,6 +447,29 @@ Item {
         }
     }
 
+    Eyes {
+        id: miniEyes
+        x: root.width - width - 20
+        y: (38 - height) / 2
+        eyeWidth: 6
+        eyeHeight: 13
+        gap: 6
+        opacity: Math.max(0, 1 - root.progress * 3)
+        visible: opacity > 0
+        tracking: root.cursorKnown
+        pleased: root.eyesPleased
+        beat: {
+            const l = root.levels;
+            if (!root.playing || !l || l.length === 0)
+                return 0;
+            return Math.min(1, (l[0] + (l[1] || 0)) / 2 * 1.4);
+        }
+        winkTrigger: root.winkTrigger
+        surpriseTrigger: root.surpriseTrigger
+        lookX: Math.max(-1, Math.min(1, (root.cursor.x - (miniEyes.x + miniEyes.width / 2)) / 260))
+        lookY: Math.max(-1, Math.min(1, (root.cursor.y - 19) / 140))
+    }
+
     ClippingRectangle {
         id: cover
         x: root.lerp(8, full.x + 20)
@@ -474,8 +502,10 @@ Item {
 
     Row {
         id: equalizer
-        x: root.lerp(root.width - width - 16, full.x + 282 - width)
-        y: root.lerp(8, root.topOffset + 24)
+        x: full.x + 282 - width
+        y: root.topOffset + 24
+        opacity: Math.max(0, Math.min(1, (root.progress - 0.5) * 2))
+        visible: opacity > 0
         spacing: 3
         height: 22
 

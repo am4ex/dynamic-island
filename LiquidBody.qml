@@ -20,6 +20,8 @@ Item {
     property color fillColor: Theme.background
     property color edgeColor: Theme.accent
     property real glow: 0
+    property real ring: 0
+    property real ringPhase: 0
 
     readonly property real maxWave: 14
     readonly property real toothPeriod: 22
@@ -185,6 +187,24 @@ Item {
                 GradientStop { position: 1; color: Qt.rgba(root.edgeColor.r, root.edgeColor.g, root.edgeColor.b, 0) }
             }
             PathPolyline { path: root.edge }
+        }
+    }
+
+    Shape {
+        anchors.fill: parent
+        visible: root.ring > 0.01
+        preferredRendererType: Shape.CurveRenderer
+
+        ShapePath {
+            fillColor: "transparent"
+            strokeColor: Qt.rgba(root.edgeColor.r, root.edgeColor.g, root.edgeColor.b, root.ring)
+            strokeWidth: 2.4
+            strokeStyle: ShapePath.DashLine
+            dashPattern: [2.5, 2]
+            dashOffset: root.ringPhase
+            capStyle: ShapePath.RoundCap
+            joinStyle: ShapePath.RoundJoin
+            PathPolyline { path: root.outline }
         }
     }
 }

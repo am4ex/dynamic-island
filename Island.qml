@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.Mpris
 import Quickshell.Services.Pipewire
+import Quickshell.Services.Notifications
 
 Item {
     id: root
@@ -88,7 +89,7 @@ Item {
     }
     readonly property real fullRadius: 28
 
-    property real compactWidth: !born ? 44 : compactMode === "notice" ? (helloShown ? 190 : 340) : compactMode === "volume" ? 280 : compactMode === "layout" ? 200 : compactMode === "media" ? 270 : 200
+    property real compactWidth: !born ? 44 : compactMode === "notice" ? (helloShown ? 190 : notice && notice.kind === "app" ? 380 : 340) : compactMode === "volume" ? 280 : compactMode === "layout" ? 200 : compactMode === "media" ? 270 : 200
     property real compactHeight: !born ? 24 : compactMode === "notice" && !helloShown ? 50 : 38
     readonly property real compactRadius: compactHeight / 2
 
@@ -152,7 +153,10 @@ Item {
             xScale: root.stretchX
             yScale: root.stretchY
         },
-        Translate { y: -(root.height + 40) * root.slide }
+        Translate {
+            x: root.shakeX
+            y: -(root.height + 40) * root.slide
+        }
     ]
 
     onConcealedChanged: {
@@ -219,7 +223,10 @@ Item {
 
     Connections {
         target: cursor
-        function onMoved() { root.updateReveal(); }
+        function onMoved() {
+            root.updateReveal();
+            root.trackMood();
+        }
     }
     readonly property point cursorLocal: Qt.point(cursor.globalX - globalOrigin.x, cursor.globalY - globalOrigin.y)
     readonly property bool pulling: mode === "idle" && cursor.known
@@ -240,23 +247,34 @@ Item {
         SpringAnimation { spring: 2.5; damping: 0.25; epsilon: 0.05 }
     }
 
-    readonly property color accent: {
-        const cs = quantizer.colors;
-        let best = null;
-        let score = -1;
-        for (let i = 0; i < cs.length; i++) {
-            const s = cs[i].hsvSaturation * cs[i].hsvValue;
-            if (s > score) {
-                score = s;
-                best = cs[i];
-            }
-        }
-        if (!best || score < 0.08)
-            return "#5f9a4a";
-        return Qt.hsva(best.hsvHue, Math.min(0.72, best.hsvSaturation * 0.9 + 0.08), Math.min(0.82, Math.max(0.62, best.hsvValue * 0.9)), 1);
-    }
+    readonly property color accent: Theme.accent
     readonly property bool helloShown: notice !== null && notice.kind === "hello"
-    readonly property color edgeColor: compactMode === "notice" ? (notice && notice.kind === "timer" ? "#e8913a" : Theme.accent) : accent
+    readonly property color edgeColor: Theme.accent
+    readonly property bool alarm: notice !== null && notice.kind === "timer"
+    property real shakeX: 0
+    property real ringPhase: 0
+    property real ring: alarm ? 1 : 0
+    Behavior on ring {
+        NumberAnimation { duration: 300 }
+    }
+
+    SequentialAnimation {
+        running: root.alarm
+        loops: Animation.Infinite
+        onStopped: root.shakeX = 0
+        NumberAnimation { target: root; property: "shakeX"; to: 5; duration: 45 }
+        NumberAnimation { target: root; property: "shakeX"; to: -5; duration: 90 }
+        NumberAnimation { target: root; property: "shakeX"; to: 4; duration: 80 }
+        NumberAnimation { target: root; property: "shakeX"; to: -3; duration: 70 }
+        NumberAnimation { target: root; property: "shakeX"; to: 2; duration: 60 }
+        NumberAnimation { target: root; property: "shakeX"; to: 0; duration: 50 }
+        PauseAnimation { duration: 650 }
+    }
+
+    FrameAnimation {
+        running: root.alarm || root.ring > 0.01
+        onTriggered: root.ringPhase -= frameTime * 9
+    }
 
     property real glow: Math.max(waveAmount, compactMode === "notice" && !helloShown ? 1 : 0)
     Behavior on glow {
@@ -308,6 +326,111 @@ Item {
         noticeTimer.restart();
     }
 
+    property var notifQueue: []
+
+    property int winkCounter: 0
+    property int surpriseCounter: 0
+    property real lastMoveAt: Date.now()
+    property real lastSurpriseAt: 0
+    property point lastCursor: Qt.point(0, 0)
+    property bool sleepy: false
+    readonly property bool pleased: {
+        if (!cursor.known || pointerIn)
+            return false;
+        const dx = Math.abs(cursorLocal.x - width / 2);
+        const dy = cursorLocal.y - height;
+        return dx < width / 2 + 60 && dy < 70;
+    }
+
+    function trackMood() {
+        const now = Date.now();
+        const dt = Math.max(1, now - lastMoveAt);
+        const dx = cursor.globalX - lastCursor.x;
+        const dy = cursor.globalY - lastCursor.y;
+        const speed = Math.sqrt(dx * dx + dy * dy) / dt * 1000;
+        if (speed > 5000 && dt < 80 && now - lastSurpriseAt > 4000 && !sleepy) {
+            lastSurpriseAt = now;
+            surpriseCounter = surpriseCounter + 1;
+        }
+        lastCursor = Qt.point(cursor.globalX, cursor.globalY);
+        lastMoveAt = now;
+        if (sleepy) {
+            sleepy = false;
+            surpriseCounter = surpriseCounter + 1;
+        }
+    }
+
+    Timer {
+        interval: 5000
+        repeat: true
+        running: true
+        onTriggered: root.sleepy = !root.playing && Date.now() - root.lastMoveAt > 120000
+    }
+    property var notifHistory: []
+    property int notifUnread: 0
+
+    function plain(text) {
+        return (text || "").replace(/<[^>]*>/g, "").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/\s+/g, " ").trim();
+    }
+
+    function presentNotification(n) {
+        let ms = n.expireTimeout;
+        if (ms > 0 && ms < 100)
+            ms = ms * 1000;
+        const duration = n.urgency === NotificationUrgency.Critical ? 10000 : ms > 0 ? Math.max(3000, Math.min(10000, ms)) : 5500;
+        const icon = n.image !== "" ? n.image : Quickshell.iconPath(n.appIcon !== "" ? n.appIcon : n.desktopEntry, true);
+        showNotice({ kind: "app", title: plain(n.summary) || n.appName, subtitle: plain(n.body), app: n.appName, icon: icon, ref: n }, duration);
+        notifHistory = [{ title: plain(n.summary) || n.appName, body: plain(n.body), app: n.appName, icon: icon, entry: n.desktopEntry, time: Qt.formatDateTime(new Date(), "h:mm AP") }].concat(notifHistory).slice(0, 30);
+        notifUnread = notifUnread + 1;
+    }
+
+    function nextNotification() {
+        if (notifQueue.length > 0) {
+            const n = notifQueue[0];
+            notifQueue = notifQueue.slice(1);
+            presentNotification(n);
+            return true;
+        }
+        return false;
+    }
+
+    function activateNotification() {
+        const n = notice ? notice.ref : null;
+        if (!n)
+            return;
+        const actions = n.actions || [];
+        const def = actions.find(a => a.identifier === "default") || (actions.length === 1 ? actions[0] : null);
+        if (def)
+            def.invoke();
+        n.dismiss();
+        if (!nextNotification())
+            notice = null;
+    }
+
+    NotificationServer {
+        keepOnReload: false
+        bodySupported: true
+        actionsSupported: true
+        imageSupported: true
+        persistenceSupported: false
+        onNotification: n => {
+            n.tracked = true;
+            root.winkCounter = root.winkCounter + 1;
+            if (root.notice !== null && root.notice.kind === "app")
+                root.notifQueue = root.notifQueue.concat([n]);
+            else
+                root.presentNotification(n);
+        }
+    }
+
+    Connections {
+        target: root.notice && root.notice.ref ? root.notice.ref : null
+        function onClosed() {
+            if (!root.nextNotification())
+                root.notice = null;
+        }
+    }
+
     function showVolume() {
         if (!volumeArmed || expanded)
             return;
@@ -343,13 +466,6 @@ Item {
         precision: SystemClock.Minutes
     }
 
-    ColorQuantizer {
-        id: quantizer
-        source: root.player ? root.player.trackArtUrl : ""
-        depth: 2
-        rescaleSize: 32
-    }
-
     AudioBars {
         id: audio
         active: root.playing
@@ -363,6 +479,7 @@ Item {
         onCopied: text => {
             const clean = text.replace(/\s+/g, " ").trim();
             root.showNotice({ kind: "clip", title: "Скопировано", subtitle: clean || "Изображение или файл" }, 2500);
+            root.winkCounter = root.winkCounter + 1;
         }
     }
 
@@ -371,7 +488,7 @@ Item {
     }
 
     FrameAnimation {
-        running: root.splash > 0.01
+        running: root.splash > 0.01 || root.alarm
         onTriggered: root.phase += frameTime * 1.6
     }
 
@@ -398,7 +515,13 @@ Item {
 
     Timer {
         id: noticeTimer
-        onTriggered: root.notice = null
+        onTriggered: {
+            const n = root.notice ? root.notice.ref : null;
+            if (n)
+                n.expire();
+            if (!root.nextNotification())
+                root.notice = null;
+        }
     }
 
     Timer {
@@ -451,7 +574,9 @@ Item {
         bodyHeight: root.height
         radius: root.radius
         levels: audio.levels
-        waveAmount: Math.max(root.waveAmount, root.splash * 0.45)
+        waveAmount: Math.max(root.waveAmount, root.splash * 0.45, root.alarm ? 0.6 : 0)
+        ring: root.ring
+        ringPhase: root.ringPhase
         phase: root.phase
         gradient: root.gradientAmount
         pull: root.pull
@@ -468,7 +593,12 @@ Item {
 
         MouseArea {
             anchors.fill: parent
-            onClicked: root.pinned = !root.pinned
+            onClicked: {
+                if (root.notice !== null && root.notice.kind === "app")
+                    root.activateNotification();
+                else
+                    root.pinned = !root.pinned;
+            }
         }
 
         Morph {
@@ -481,6 +611,10 @@ Item {
                 layoutBadge: root.layoutBadge
                 cursorKnown: cursor.known
                 cursor: root.cursorLocal
+                sleeping: root.sleepy
+                pleased: root.pleased
+                winkTrigger: root.winkCounter
+                surpriseTrigger: root.surpriseCounter
             }
         }
 
@@ -495,6 +629,11 @@ Item {
                 expanded: root.playerOpen
                 timeText: root.timeText
                 layoutBadge: root.layoutBadge
+                cursorKnown: cursor.known
+                cursor: root.cursorLocal
+                eyesPleased: root.pleased
+                winkTrigger: root.winkCounter
+                surpriseTrigger: root.surpriseCounter
                 levels: audio.levels
                 accent: root.accent
                 players: root.players
@@ -529,6 +668,13 @@ Item {
                 overlay: root
                 activeClass: cursor.activeClass
                 activeTitle: cursor.activeTitle
+                notifHistory: root.notifHistory
+                notifUnread: root.notifUnread
+                onHistoryViewed: root.notifUnread = 0
+                onHistoryCleared: {
+                    root.notifHistory = [];
+                    root.notifUnread = 0;
+                }
                 onWantsKeyboardChanged: root.homeWantsKeyboard = wantsKeyboard
                 onTimerFinished: minutes => root.showNotice({ kind: "timer", title: "Время вышло", subtitle: "Таймер · " + minutes + " мин" }, 9000)
                 onMenuOpenChanged: root.trayMenuOpen = menuOpen

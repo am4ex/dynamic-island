@@ -14,6 +14,10 @@ Item {
     property string activeClass: ""
     property string activeTitle: ""
     signal timerFinished(int minutes)
+    signal historyViewed
+    signal historyCleared
+    property var notifHistory: []
+    property int notifUnread: 0
     readonly property bool wantsKeyboard: dashboard.wantsKeyboard
     readonly property bool cardHovered: menuHover.hovered || paletteHover.hovered
 
@@ -39,6 +43,10 @@ Item {
         activeClass: root.activeClass
         activeTitle: root.activeTitle
         onTimerFinished: minutes => root.timerFinished(minutes)
+        notifHistory: root.notifHistory
+        notifUnread: root.notifUnread
+        onHistoryViewed: root.historyViewed()
+        onHistoryCleared: root.historyCleared()
     }
 
     Rectangle {

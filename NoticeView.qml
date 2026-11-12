@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell.Widgets
 
 Item {
     id: root
@@ -56,9 +57,24 @@ Item {
             color: Theme.accent
         }
 
+        ClippingRectangle {
+            anchors.centerIn: parent
+            visible: root.kind === "app"
+            width: 30
+            height: 30
+            radius: 9
+            color: "transparent"
+
+            IconImage {
+                anchors.fill: parent
+                source: root.kind === "app" && root.notice.icon ? root.notice.icon : ""
+            }
+        }
+
         Eyes {
             anchors.centerIn: parent
             visible: root.kind === "timer"
+            alarmed: root.kind === "timer"
             eyeWidth: 8
             eyeHeight: 17
             gap: 6

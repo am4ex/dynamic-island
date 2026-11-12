@@ -29,15 +29,41 @@ Item {
 
     signal timerFinished(int minutes)
 
+    property var notifHistory: []
+    property int notifUnread: 0
+    signal historyViewed
+    signal historyCleared
+    property bool historyPanel: false
+
+    onHistoryPanelChanged: {
+        if (historyPanel) {
+            wifiPanel = false;
+            historyViewed();
+        }
+    }
+
     property bool wifiPanel: false
     property var networks: []
     property var savedNets: []
     property bool scanning: false
     property string wifiStatus: ""
     property string passwordFor: ""
-    readonly property bool wantsKeyboard: passwordFor !== ""
+    property bool customTimer: false
+    readonly property bool wantsKeyboard: passwordFor !== "" || customTimer
+
+    onChoosingTimerChanged: if (!choosingTimer) customTimer = false
+
+    function startTimer(seconds) {
+        if (seconds > 0) {
+            timerTotal = seconds;
+            timerLeft = seconds;
+        }
+        choosingTimer = false;
+    }
 
     onWifiPanelChanged: {
+        if (wifiPanel)
+            historyPanel = false;
         passwordFor = "";
         wifiStatus = "";
         if (wifiPanel) {
@@ -173,6 +199,7 @@ Item {
         } else {
             choosingTimer = false;
             wifiPanel = false;
+            historyPanel = false;
         }
     }
 
@@ -433,7 +460,7 @@ Item {
         y: 10
         width: root.width - x - 22
         spacing: 2
-        visible: !root.wifiPanel
+        visible: !root.wifiPanel && !root.historyPanel
 
         Text {
             text: "Скопировано"
@@ -719,6 +746,139 @@ Item {
         }
     }
 
+    Item {
+        x: 262
+        y: 4
+        width: root.width - x - 22
+        height: 172
+        visible: root.historyPanel
+
+        Text {
+            y: 4
+            text: "Уведомления"
+            color: Theme.accent
+            font.family: Theme.fontFamily
+            font.weight: Font.ExtraBold
+            font.pixelSize: 14
+        }
+
+        Text {
+            anchors.right: parent.right
+            y: 5
+            visible: root.notifHistory.length > 0
+            text: "Очистить"
+            color: clearArea.containsMouse ? Theme.dim : Theme.faint
+            font.family: Theme.fontFamily
+            font.weight: Font.Bold
+            font.pixelSize: 12
+
+            MouseArea {
+                id: clearArea
+                anchors.fill: parent
+                anchors.margins: -6
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.historyCleared()
+            }
+        }
+
+        Flickable {
+            y: 30
+            width: parent.width
+            height: parent.height - 30
+            contentHeight: historyColumn.height
+            clip: true
+            boundsBehavior: Flickable.StopAtBounds
+
+            Column {
+                id: historyColumn
+                width: parent.width
+
+                Repeater {
+                    model: root.historyPanel ? root.notifHistory : []
+
+                    Item {
+                        id: historyRow
+                        required property var modelData
+                        width: historyColumn.width
+                        height: 40
+
+                        Rectangle {
+                            anchors.fill: parent
+                            anchors.leftMargin: -8
+                            radius: 10
+                            color: Theme.accent
+                            opacity: historyArea.containsMouse ? 0.08 : 0
+                        }
+
+                        IconImage {
+                            anchors.verticalCenter: parent.verticalCenter
+                            implicitSize: 22
+                            source: historyRow.modelData.icon || Quickshell.iconPath("dialog-information")
+                        }
+
+                        Text {
+                            x: 32
+                            y: 4
+                            width: parent.width - 32 - 64
+                            text: historyRow.modelData.title
+                            elide: Text.ElideRight
+                            color: Theme.accent
+                            font.family: Theme.fontFamily
+                            font.weight: Font.ExtraBold
+                            font.pixelSize: 13
+                        }
+
+                        Text {
+                            x: 32
+                            y: 21
+                            width: parent.width - 32
+                            text: historyRow.modelData.body || historyRow.modelData.app
+                            elide: Text.ElideRight
+                            color: Theme.faint
+                            font.family: Theme.fontFamily
+                            font.weight: Font.Bold
+                            font.pixelSize: 12
+                        }
+
+                        Text {
+                            anchors.right: parent.right
+                            y: 5
+                            text: historyRow.modelData.time
+                            color: Theme.faint
+                            font.family: Theme.fontFamily
+                            font.weight: Font.Bold
+                            font.pixelSize: 11
+                        }
+
+                        MouseArea {
+                            id: historyArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                const d = historyRow.modelData;
+                                const entry = (d.entry ? DesktopEntries.byId(d.entry) : null) || DesktopEntries.heuristicLookup(d.app);
+                                if (entry)
+                                    entry.execute();
+                            }
+                        }
+                    }
+                }
+
+                Text {
+                    visible: root.notifHistory.length === 0
+                    topPadding: 24
+                    text: "Новых уведомлений нет"
+                    color: Theme.faint
+                    font.family: Theme.fontFamily
+                    font.weight: Font.Bold
+                    font.pixelSize: 13
+                }
+            }
+        }
+    }
+
     Row {
         id: actions
         x: 22
@@ -787,6 +947,54 @@ Item {
                 Rectangle { x: 4.6; y: 5.4; width: 2; height: 6.5; radius: 1; rotation: -45; color: Theme.accent }
                 Rectangle { x: 11.4; y: 5.4; width: 2; height: 6.5; radius: 1; rotation: 45; color: Theme.accent }
                 Rectangle { x: 2; y: 15; width: 14; height: 2; radius: 1; color: Theme.accent }
+            }
+        }
+
+        RoundButton {
+            id: bellButton
+            on: root.historyPanel
+            badge: root.notifUnread > 0 ? String(root.notifUnread) : ""
+            onClicked: root.historyPanel = !root.historyPanel
+
+            Item {
+                width: 18
+                height: 18
+                readonly property color ink: bellButton.on ? Theme.background : Theme.accent
+
+                Rectangle {
+                    x: 3.5
+                    y: 2
+                    width: 11
+                    height: 11
+                    radius: 5.5
+                    color: parent.ink
+                }
+
+                Rectangle {
+                    x: 3.5
+                    y: 7.5
+                    width: 11
+                    height: 6
+                    color: parent.ink
+                }
+
+                Rectangle {
+                    x: 1.5
+                    y: 12
+                    width: 15
+                    height: 2.2
+                    radius: 1.1
+                    color: parent.ink
+                }
+
+                Rectangle {
+                    x: 7
+                    y: 15
+                    width: 4
+                    height: 2.5
+                    radius: 1.25
+                    color: parent.ink
+                }
             }
         }
     }
@@ -877,11 +1085,65 @@ Item {
 
         Row {
             anchors.verticalCenter: parent.verticalCenter
+            spacing: 10
+            visible: root.customTimer
+
+            Rectangle {
+                anchors.verticalCenter: parent.verticalCenter
+                width: 74
+                height: 30
+                radius: 15
+                color: root.tint(0.1)
+
+                TextInput {
+                    id: customInput
+                    anchors.centerIn: parent
+                    width: parent.width - 20
+                    horizontalAlignment: TextInput.AlignHCenter
+                    color: Theme.accent
+                    font.family: Theme.fontFamily
+                    font.weight: Font.ExtraBold
+                    font.pixelSize: 14
+                    validator: RegularExpressionValidator { regularExpression: /^[0-9]{0,3}(:[0-9]{0,2})?$/ }
+                    onVisibleChanged: if (visible) { text = ""; forceActiveFocus(); }
+                    function submit() {
+                        const parts = text.split(":");
+                        const seconds = (parseInt(parts[0]) || 0) * 60 + (parseInt(parts[1]) || 0);
+                        root.startTimer(seconds);
+                    }
+                    Keys.onReturnPressed: submit()
+                    Keys.onEnterPressed: submit()
+                    Keys.onEscapePressed: root.choosingTimer = false
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    visible: customInput.text === ""
+                    text: "мин"
+                    color: Theme.faint
+                    font.family: Theme.fontFamily
+                    font.weight: Font.Bold
+                    font.pixelSize: 13
+                }
+            }
+
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: "например 7 или 2:30, Enter"
+                color: Theme.faint
+                font.family: Theme.fontFamily
+                font.weight: Font.Bold
+                font.pixelSize: 12
+            }
+        }
+
+        Row {
+            anchors.verticalCenter: parent.verticalCenter
             spacing: 4
-            visible: root.choosingTimer
+            visible: root.choosingTimer && !root.customTimer
 
             Repeater {
-                model: [5, 10, 15, 25, 45]
+                model: [5, 10, 15, 25, 45, 0]
 
                 Item {
                     required property var modelData
@@ -898,7 +1160,7 @@ Item {
                     Text {
                         id: chooseText
                         anchors.centerIn: parent
-                        text: parent.modelData + " мин"
+                        text: parent.modelData > 0 ? parent.modelData + " мин" : "Своё"
                         color: Theme.accent
                         font.family: Theme.fontFamily
                         font.weight: Font.Bold
@@ -911,9 +1173,10 @@ Item {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            root.timerTotal = parent.modelData * 60;
-                            root.timerLeft = root.timerTotal;
-                            root.choosingTimer = false;
+                            if (parent.modelData > 0)
+                                root.startTimer(parent.modelData * 60);
+                            else
+                                root.customTimer = true;
                         }
                     }
                 }
