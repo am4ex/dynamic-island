@@ -116,3 +116,7 @@ ISLAND_LANG=ru quickshell -p ~/.config/quickshell/island
 | `AppsView.qml` | лаунчер приложений |
 | `cursor_bridge.py`, `kwin_cursor.js` | мост к KWin: курсор, окна, раскладка, Meta |
 | `Theme.qml` | цвета и шрифт, сохраняются между запусками |
+
+## Лицензия
+
+[MIT](LICENSE) — можно свободно использовать, менять и распространять, сохраняя указание авторства.
