@@ -204,6 +204,7 @@ Item {
         }
 
         Text {
+            textFormat: Text.PlainText
             anchors.horizontalCenter: parent.horizontalCenter
             y: cell.iconSize + 18
             width: parent.width - 8
@@ -242,6 +243,7 @@ Item {
         }
 
         Text {
+            textFormat: Text.PlainText
             id: modeText
             anchors.centerIn: parent
             text: mode.label
@@ -334,6 +336,7 @@ Item {
         }
 
         Text {
+            textFormat: Text.PlainText
             x: search.x
             anchors.verticalCenter: parent.verticalCenter
             visible: root.query === ""
@@ -416,6 +419,7 @@ Item {
             }
 
             Text {
+                textFormat: Text.PlainText
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: 12
@@ -470,6 +474,7 @@ Item {
                     width: groupColumn.width
 
                     Text {
+                        textFormat: Text.PlainText
                         leftPadding: 8
                         topPadding: 6
                         bottomPadding: 2
@@ -529,6 +534,7 @@ Item {
         }
 
         Text {
+            textFormat: Text.PlainText
             x: (parent.width - width) / 2
             y: 40
             visible: root.results.length === 0

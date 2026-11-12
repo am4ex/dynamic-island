@@ -48,6 +48,7 @@ Item {
         }
 
         Text {
+            textFormat: Text.PlainText
         anchors.verticalCenter: parent.verticalCenter
         text: root.timeText
         color: Theme.accent

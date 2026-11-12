@@ -14,6 +14,7 @@ Rectangle {
     border.color: "#6a6a6a"
 
     Text {
+        textFormat: Text.PlainText
         id: label
         anchors.centerIn: parent
         text: root.code

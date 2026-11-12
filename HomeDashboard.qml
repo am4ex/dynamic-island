@@ -393,6 +393,7 @@ Item {
             color: Theme.accent
 
             Text {
+                textFormat: Text.PlainText
                 id: badgeText
                 anchors.centerIn: parent
                 text: btn.badge
@@ -420,6 +421,7 @@ Item {
         visible: root.activeTitle !== "" || root.activeClass !== ""
 
         Text {
+            textFormat: Text.PlainText
             anchors.verticalCenter: parent.verticalCenter
             width: Math.min(implicitWidth, 260)
             text: root.activeTitle || root.activeClass
@@ -442,6 +444,7 @@ Item {
             spacing: 6
 
             Text {
+                textFormat: Text.PlainText
                 id: bigTime
                 text: Qt.formatDateTime(clock.date, "h:mm AP").split(" ")[0]
                 color: Theme.accent
@@ -452,6 +455,7 @@ Item {
             }
 
             Text {
+                textFormat: Text.PlainText
                 anchors.baseline: bigTime.baseline
                 text: Qt.formatDateTime(clock.date, "AP")
                 color: Theme.faint
@@ -462,6 +466,7 @@ Item {
         }
 
         Text {
+            textFormat: Text.PlainText
             y: timeRow.height + 2
             text: {
                 const s = clock.date.toLocaleDateString(Qt.locale(), Tr.russian ? "dddd, d MMMM" : "dddd, MMMM d");
@@ -493,6 +498,7 @@ Item {
                 spacing: 1
 
                 Text {
+                    textFormat: Text.PlainText
                     text: modelData.label
                     color: Theme.faint
                     font.family: Theme.fontFamily
@@ -501,6 +507,7 @@ Item {
                 }
 
                 Text {
+                    textFormat: Text.PlainText
                     text: modelData.value
                     color: Theme.accent
                     font.family: Theme.fontFamily
@@ -510,6 +517,7 @@ Item {
                 }
 
                 Text {
+                    textFormat: Text.PlainText
                     text: modelData.sub
                     color: Theme.dim
                     font.family: Theme.fontFamily
@@ -529,6 +537,7 @@ Item {
         visible: root.clipPanel
 
         Text {
+            textFormat: Text.PlainText
             text: Tr.t("Скопировано")
             color: Theme.faint
             font.family: Theme.fontFamily
@@ -560,6 +569,7 @@ Item {
                 }
 
                 Text {
+                    textFormat: Text.PlainText
                     anchors.verticalCenter: parent.verticalCenter
                     width: parent.width - 8
                     text: clipRow.modelData.replace(/\s+/g, " ").trim()
@@ -584,6 +594,7 @@ Item {
         }
 
         Text {
+            textFormat: Text.PlainText
             visible: root.clipItems.length === 0
             text: Tr.t("Пока пусто")
             color: Theme.faint
@@ -601,6 +612,7 @@ Item {
         visible: root.wifiPanel
 
         Text {
+            textFormat: Text.PlainText
             y: 4
             text: "Wi-Fi"
             color: Theme.accent
@@ -610,6 +622,7 @@ Item {
         }
 
         Text {
+            textFormat: Text.PlainText
             x: 52
             y: 6
             text: root.scanning ? Tr.t("Поиск сетей…") : root.wifiStatus
@@ -698,6 +711,7 @@ Item {
                             }
 
                             Text {
+                                textFormat: Text.PlainText
                                 x: 24
                                 anchors.verticalCenter: parent.verticalCenter
                                 width: parent.width - 24 - 90
@@ -737,6 +751,7 @@ Item {
                             }
 
                             Text {
+                                textFormat: Text.PlainText
                                 anchors.right: parent.right
                                 anchors.verticalCenter: parent.verticalCenter
                                 visible: netRow.modelData.inUse
@@ -786,6 +801,7 @@ Item {
                             }
 
                             Text {
+                                textFormat: Text.PlainText
                                 x: 12
                                 anchors.verticalCenter: parent.verticalCenter
                                 visible: passInput.text === ""
@@ -800,6 +816,7 @@ Item {
                 }
 
                 Text {
+                    textFormat: Text.PlainText
                     visible: !root.wifiOn
                     topPadding: 20
                     text: Tr.t("Wi-Fi выключен")
@@ -820,6 +837,7 @@ Item {
         visible: root.historyPanel
 
         Text {
+            textFormat: Text.PlainText
             y: 4
             text: Tr.t("Уведомления")
             color: Theme.accent
@@ -829,6 +847,7 @@ Item {
         }
 
         Text {
+            textFormat: Text.PlainText
             anchors.right: parent.right
             y: 5
             visible: root.notifHistory.length > 0
@@ -884,6 +903,7 @@ Item {
                         }
 
                         Text {
+                            textFormat: Text.PlainText
                             x: 32
                             y: 4
                             width: parent.width - 32 - sourceText.width - 10
@@ -896,6 +916,7 @@ Item {
                         }
 
                         Text {
+                            textFormat: Text.PlainText
                             x: 32
                             y: 21
                             width: parent.width - 32
@@ -908,6 +929,7 @@ Item {
                         }
 
                         Text {
+                            textFormat: Text.PlainText
                             id: sourceText
                             anchors.right: parent.right
                             y: 5
@@ -931,6 +953,7 @@ Item {
                 }
 
                 Text {
+                    textFormat: Text.PlainText
                     visible: root.notifHistory.length === 0
                     topPadding: 24
                     text: Tr.t("Новых уведомлений нет")
@@ -1110,6 +1133,7 @@ Item {
             visible: !root.choosingTimer
 
             Text {
+                textFormat: Text.PlainText
                 visible: root.timerRunning
                 text: root.fmt(root.timerLeft)
                 color: Theme.accent
@@ -1128,6 +1152,7 @@ Item {
             visible: !root.choosingTimer && !root.wifiPanel && !root.historyPanel
 
             Text {
+                textFormat: Text.PlainText
                 id: deviceName
                 anchors.verticalCenter: parent.verticalCenter
                 width: Math.min(implicitWidth, 160)
@@ -1154,6 +1179,7 @@ Item {
             }
 
             Text {
+                textFormat: Text.PlainText
                 anchors.verticalCenter: parent.verticalCenter
                 text: root.sinkReady ? Math.round(root.sink.audio.volume * 100) + "%" : ""
                 color: Theme.dim
@@ -1198,6 +1224,7 @@ Item {
                 }
 
                 Text {
+                    textFormat: Text.PlainText
                     anchors.centerIn: parent
                     visible: customInput.text === ""
                     text: Tr.t("мин : сек")
@@ -1221,6 +1248,7 @@ Item {
                 }
 
                 Text {
+                    textFormat: Text.PlainText
                     id: startText
                     anchors.centerIn: parent
                     text: Tr.t("Старт")
@@ -1261,6 +1289,7 @@ Item {
                     }
 
                     Text {
+                        textFormat: Text.PlainText
                         id: chooseText
                         anchors.centerIn: parent
                         text: parent.modelData > 0 ? parent.modelData + Tr.t(" мин") : Tr.t("Своё")

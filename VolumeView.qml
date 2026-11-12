@@ -89,6 +89,7 @@ Item {
     }
 
     Text {
+        textFormat: Text.PlainText
         font.family: Theme.fontFamily
         anchors.right: parent.right
         anchors.rightMargin: 18

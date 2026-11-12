@@ -66,6 +66,7 @@ Item {
             }
 
             Text {
+                textFormat: Text.PlainText
                 anchors.centerIn: parent
                 text: "‹"
                 color: Theme.accent
@@ -84,6 +85,7 @@ Item {
         }
 
         Text {
+            textFormat: Text.PlainText
             x: back.width + 6
             anchors.verticalCenter: parent.verticalCenter
             width: parent.width - x - 32
@@ -108,6 +110,7 @@ Item {
             }
 
             Text {
+                textFormat: Text.PlainText
                 anchors.centerIn: parent
                 text: "×"
                 color: Theme.dim
@@ -197,6 +200,7 @@ Item {
                         }
 
                         Text {
+                            textFormat: Text.PlainText
                             anchors.verticalCenter: parent.verticalCenter
                             width: row.width - 70
                             text: root.clean(row.modelData.text)
@@ -209,6 +213,7 @@ Item {
                     }
 
                     Text {
+                        textFormat: Text.PlainText
                         visible: row.modelData.hasChildren
                         anchors.right: parent.right
                         anchors.rightMargin: 10

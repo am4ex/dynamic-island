@@ -140,6 +140,7 @@ Item {
         }
 
         Text {
+            textFormat: Text.PlainText
             anchors.verticalCenter: parent.verticalCenter
             font.family: Theme.fontFamily
             font.weight: Font.Bold
@@ -166,6 +167,7 @@ Item {
             spacing: 3
 
             Text {
+                textFormat: Text.PlainText
                 font.family: Theme.fontFamily
                 width: parent.width
                 text: root.player ? (root.player.trackTitle || Tr.t("Неизвестный трек")) : ""
@@ -176,6 +178,7 @@ Item {
             }
 
             Text {
+                textFormat: Text.PlainText
                 font.family: Theme.fontFamily
                 font.weight: Font.Bold
                 width: parent.width
@@ -187,6 +190,7 @@ Item {
         }
 
         Text {
+            textFormat: Text.PlainText
             font.family: Theme.fontFamily
             font.weight: Font.Bold
             id: elapsed
@@ -225,6 +229,7 @@ Item {
         }
 
         Text {
+            textFormat: Text.PlainText
             font.family: Theme.fontFamily
             font.weight: Font.Bold
             x: 246
@@ -384,6 +389,7 @@ Item {
                     model: lyrics.lines
 
                     Text {
+                        textFormat: Text.PlainText
                         font.family: Theme.fontFamily
                         required property var modelData
                         required property int index
@@ -405,6 +411,7 @@ Item {
             }
 
             Text {
+                textFormat: Text.PlainText
                 font.family: Theme.fontFamily
                 font.weight: Font.Bold
                 anchors.centerIn: parent
@@ -434,6 +441,7 @@ Item {
                     color: selected ? "#40ffffff" : chipArea.containsMouse ? "#26ffffff" : "#14ffffff"
 
                     Text {
+                        textFormat: Text.PlainText
                         font.family: Theme.fontFamily
                         font.weight: Font.Bold
                         id: chipText
@@ -498,6 +506,7 @@ Item {
         }
 
         Text {
+            textFormat: Text.PlainText
             font.family: Theme.fontFamily
             font.weight: Font.Bold
             anchors.centerIn: parent

@@ -125,6 +125,7 @@ Item {
     }
 
     Text {
+        textFormat: Text.PlainText
         x: root.width + 2 + root.zLift * 4
         y: -4 - root.zLift * 10
         opacity: root.zOpacity

@@ -396,7 +396,8 @@ Item {
         if (ms > 0 && ms < 100)
             ms = ms * 1000;
         const duration = n.urgency === NotificationUrgency.Critical ? 10000 : ms > 0 ? Math.max(3000, Math.min(10000, ms)) : 5500;
-        const icon = n.image !== "" ? n.image : Quickshell.iconPath(n.appIcon !== "" ? n.appIcon : n.desktopEntry, true);
+        const remote = v => /^[a-z]+:\/\//i.test(v || "") && !/^(file|image):\/\//i.test(v);
+        const icon = n.image !== "" && !remote(n.image) ? n.image : remote(n.appIcon) ? Quickshell.iconPath(n.desktopEntry, true) : Quickshell.iconPath(n.appIcon !== "" ? n.appIcon : n.desktopEntry, true);
         showNotice({ kind: "app", title: plain(n.summary) || n.appName, subtitle: plain(n.body), app: n.appName, icon: icon, ref: n }, duration);
         const all = [{ title: plain(n.summary) || n.appName, body: plain(n.body), app: n.appName, icon: icon, entry: n.desktopEntry, ref: n, time: Qt.formatDateTime(new Date(), "h:mm AP") }].concat(notifHistory);
         releaseHistory(all.slice(30));
@@ -789,6 +790,7 @@ Item {
                     color: selected ? "#26ffffff" : tabArea.containsMouse ? "#14ffffff" : "transparent"
 
                     Text {
+                        textFormat: Text.PlainText
                         id: tabText
                         anchors.centerIn: parent
                         text: parent.modelData.label

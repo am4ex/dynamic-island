@@ -142,6 +142,7 @@ Item {
         spacing: 1
 
         Text {
+            textFormat: Text.PlainText
             font.family: Theme.fontFamily
             width: parent.width
             text: root.title.substring(0, root.typed)
@@ -152,6 +153,7 @@ Item {
         }
 
         Text {
+            textFormat: Text.PlainText
             font.family: Theme.fontFamily
             font.weight: Font.Bold
             width: parent.width
