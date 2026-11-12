@@ -36,6 +36,14 @@ ShellRoot {
             }
 
             Region {
+                readonly property Item b: island.timerBubble
+                x: island.x + (b ? b.x : 0)
+                y: island.y + (b ? b.y : 0)
+                width: b && b.visible && !island.concealed ? b.width : 0
+                height: b && b.visible && !island.concealed ? b.height : 0
+            }
+
+            Region {
                 readonly property Item card: island.rightCard
                 x: island.x + (card ? card.x : 0)
                 y: island.y + (card ? card.y : 0)

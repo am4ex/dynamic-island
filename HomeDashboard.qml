@@ -474,7 +474,7 @@ Item {
     }
 
     Row {
-        x: 262
+        x: 292
         y: 14
         width: root.width - x - 22
         visible: !root.wifiPanel && !root.historyPanel && !root.clipPanel
@@ -521,7 +521,7 @@ Item {
     }
 
     Column {
-        x: 262
+        x: 292
         y: 10
         width: root.width - x - 22
         spacing: 2
@@ -593,7 +593,7 @@ Item {
     }
 
     Item {
-        x: 262
+        x: 292
         y: 4
         width: root.width - x - 22
         height: 172
@@ -812,7 +812,7 @@ Item {
     }
 
     Item {
-        x: 262
+        x: 292
         y: 4
         width: root.width - x - 22
         height: 172
@@ -1126,7 +1126,7 @@ Item {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             spacing: 10
-            visible: !root.choosingTimer
+            visible: !root.choosingTimer && !root.wifiPanel && !root.historyPanel
 
             Text {
                 id: deviceName

@@ -14,6 +14,8 @@ Item {
     property string activeClass: ""
     property string activeTitle: ""
     signal timerFinished(int minutes)
+    readonly property int timerLeft: dashboard.timerLeft
+    readonly property int timerTotal: dashboard.timerTotal
     signal historyViewed
     signal historyCleared
     property var notifHistory: []

@@ -6,7 +6,7 @@ Row {
     property bool mic: false
     property bool screen: false
 
-    spacing: 4
+    spacing: 5
     visible: width > 0.5
     width: (mic || screen) ? implicitWidth : 0
     clip: true
@@ -22,9 +22,9 @@ Row {
             required property var modelData
             anchors.verticalCenter: parent ? parent.verticalCenter : undefined
             visible: modelData.on
-            width: 7
-            height: 7
-            radius: 3.5
+            width: 9
+            height: 9
+            radius: 4.5
             color: modelData.color
             scale: modelData.on ? 1 : 0
 

@@ -45,6 +45,9 @@ Item {
     property bool trayMenuOpen: false
     property bool cardHovered: false
     property Item leftCard: null
+    property int timerLeft: 0
+    property int timerTotal: 0
+    readonly property Item timerBubble: bubble
     property Item rightCard: null
     readonly property bool pointerIn: hover.hovered || cardHovered
     property bool hoverHeld: false
@@ -81,7 +84,7 @@ Item {
             tab = "home";
     }
 
-    property real fullWidth: playerOpen ? 560 : 640
+    property real fullWidth: playerOpen ? 560 : 680
     property real fullHeight: playerOpen ? 236 : showApps ? 290 : 312
     Behavior on fullWidth {
         NumberAnimation { duration: 420; easing.type: Easing.OutBack; easing.overshoot: 0.8 }
@@ -91,8 +94,8 @@ Item {
     }
     readonly property real fullRadius: 28
 
-    property real compactWidth: !born ? 44 : compactMode === "notice" ? (helloShown ? 190 : notice && notice.kind === "app" ? 380 : 340) : compactMode === "volume" ? 280 : compactMode === "layout" ? 200 : compactMode === "media" ? 270 + root.privacyExtra : 200 + root.privacyExtra
-    readonly property real privacyExtra: (micActive ? 11 : 0) + (screenActive ? 11 : 0)
+    property real compactWidth: !born ? 44 : compactMode === "notice" ? (helloShown ? 190 : notice && notice.kind === "app" ? 380 : 340) : compactMode === "volume" ? 280 : compactMode === "layout" ? 200 : compactMode === "media" ? 310 + root.privacyExtra : 240 + root.privacyExtra
+    readonly property real privacyExtra: (micActive ? 14 : 0) + (screenActive ? 14 : 0)
     property real compactHeight: !born ? 24 : compactMode === "notice" && !helloShown ? 50 : 38
     readonly property real compactRadius: compactHeight / 2
 
@@ -588,6 +591,19 @@ Item {
         id: hover
     }
 
+    TimerBubble {
+        id: bubble
+        y: 0
+        height: root.compactHeight
+        anchorWidth: root.width
+        wanted: root.born && root.timerLeft > 0 && !root.expanded
+        fraction: root.timerTotal > 0 ? root.timerLeft / root.timerTotal : 0
+        onClicked: {
+            root.tab = "home";
+            root.pinned = true;
+        }
+    }
+
     LiquidBody {
         bodyWidth: root.width
         bodyHeight: root.height
@@ -699,6 +715,8 @@ Item {
                     root.notifUnread = 0;
                 }
                 onWantsKeyboardChanged: root.homeWantsKeyboard = wantsKeyboard
+                onTimerLeftChanged: root.timerLeft = timerLeft
+                onTimerTotalChanged: root.timerTotal = timerTotal
                 onTimerFinished: minutes => root.showNotice({ kind: "timer", title: "Время вышло", subtitle: "Таймер · " + minutes + " мин" }, 9000)
                 onMenuOpenChanged: root.trayMenuOpen = menuOpen
                 onCardHoveredChanged: root.cardHovered = cardHovered
