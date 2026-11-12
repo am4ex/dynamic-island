@@ -23,11 +23,7 @@ Item {
     property real glanceY: 0
     property real lid: 1
     property real winkLid: 1
-    property real bob: -beat * 2.2
-
-    Behavior on bob {
-        SmoothedAnimation { velocity: 40 }
-    }
+    readonly property real bob: Math.round(-beat * 2.2 * 2) / 2
     property real zLift: 0
     property real zOpacity: 0
 

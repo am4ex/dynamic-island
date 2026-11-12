@@ -76,7 +76,7 @@ Item {
             const s = Math.sin(a);
             pts.push(Qt.point(x, h - r + r * s + offsetAt(x, w, r) * s * s));
         }
-        for (let x = w - r - 3; x > r; x -= 3)
+        for (let x = w - r - 4; x > r; x -= 4)
             pts.push(Qt.point(x, h + offsetAt(x, w, r)));
         for (let k = 0; k <= seg; k++) {
             const a = 0.5 * Math.PI + 0.5 * Math.PI * k / seg;

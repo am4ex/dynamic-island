@@ -6,7 +6,7 @@ ShellRoot {
     PanelWindow {
         id: win
 
-        screen: Quickshell.screens.length > 0 ? Quickshell.screens[0] : null
+        screen: Quickshell.screens.find(s => s.name === Quickshell.env("ISLAND_SCREEN")) || (Quickshell.screens.length > 0 ? Quickshell.screens[0] : null)
 
         anchors.top: true
         margins.top: 0
