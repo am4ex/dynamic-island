@@ -78,7 +78,7 @@ Item {
                 width: parent.width
                 height: Math.max(2, parent.height * root.lid)
                 radius: width / 2
-                color: "white"
+                color: Theme.accent
             }
 
             Shape {
@@ -87,7 +87,7 @@ Item {
                 preferredRendererType: Shape.CurveRenderer
 
                 ShapePath {
-                    strokeColor: "white"
+                    strokeColor: Theme.accent
                     strokeWidth: 2.2
                     fillColor: "transparent"
                     capStyle: ShapePath.RoundCap

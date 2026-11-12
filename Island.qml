@@ -41,7 +41,21 @@ Item {
 
     property string tab: "home"
     property bool pinned: false
-    readonly property bool expanded: notice === null && !volumeShown && !layoutShown && (hover.hovered || pinned)
+    property bool trayMenuOpen: false
+    property bool cardHovered: false
+    property Item leftCard: null
+    property Item rightCard: null
+    readonly property bool pointerIn: hover.hovered || cardHovered
+    property bool hoverHeld: false
+    onPointerInChanged: {
+        if (pointerIn) {
+            leaveTimer.stop();
+            hoverHeld = true;
+        } else {
+            leaveTimer.restart();
+        }
+    }
+    readonly property bool expanded: notice === null && !volumeShown && !layoutShown && (hoverHeld || pinned)
     readonly property string compactMode: notice !== null ? "notice" : layoutShown ? "layout" : volumeShown ? "volume" : playing ? "media" : "idle"
     readonly property string mode: expanded ? "expanded" : compactMode
     readonly property bool playerOpen: expanded && tab === "player" && hasMedia
@@ -52,8 +66,8 @@ Item {
     readonly property real fullHeight: 236
     readonly property real fullRadius: 28
 
-    property real compactWidth: !born ? 44 : compactMode === "notice" ? 340 : compactMode === "volume" ? 280 : compactMode === "layout" ? 200 : compactMode === "media" ? 270 : 200
-    property real compactHeight: !born ? 24 : compactMode === "notice" ? 50 : 38
+    property real compactWidth: !born ? 44 : compactMode === "notice" ? (helloShown ? 190 : 340) : compactMode === "volume" ? 280 : compactMode === "layout" ? 200 : compactMode === "media" ? 270 : 200
+    property real compactHeight: !born ? 24 : compactMode === "notice" && !helloShown ? 50 : 38
     readonly property real compactRadius: compactHeight / 2
 
     Behavior on compactWidth {
@@ -102,7 +116,7 @@ Item {
     property real screenTop: 0
     readonly property bool fullscreenHere: screenName !== "" && cursor.fullscreenOutputs.indexOf(screenName) >= 0
     property bool revealed: false
-    readonly property bool peeking: notice !== null || layoutShown || volumeShown
+    readonly property bool peeking: notice !== null || layoutShown || volumeShown || trayMenuOpen
     readonly property bool concealed: fullscreenHere && !revealed && !peeking
 
     property real slide: 0
@@ -174,8 +188,10 @@ Item {
                 revealed = true;
             return;
         }
+        if (trayMenuOpen)
+            return;
         const below = cursor.globalY - (screenTop + 10 + height);
-        if (!hover.hovered && (below > 50 || dx > width / 2 + 120))
+        if (!pointerIn && (below > 50 || dx > width / 2 + 120))
             revealed = false;
     }
 
@@ -217,9 +233,10 @@ Item {
             return "#5f9a4a";
         return Qt.hsva(best.hsvHue, Math.min(0.72, best.hsvSaturation * 0.9 + 0.08), Math.min(0.82, Math.max(0.62, best.hsvValue * 0.9)), 1);
     }
+    readonly property bool helloShown: notice !== null && notice.kind === "hello"
     readonly property color edgeColor: compactMode === "notice" ? "#76a043" : accent
 
-    property real glow: Math.max(waveAmount, compactMode === "notice" ? 1 : 0)
+    property real glow: Math.max(waveAmount, compactMode === "notice" && !helloShown ? 1 : 0)
     Behavior on glow {
         NumberAnimation { duration: 300 }
     }
@@ -325,25 +342,7 @@ Item {
     property bool born: false
     property real splash: 0
 
-    function greetingTitle() {
-        const h = new Date().getHours();
-        if (h < 5)
-            return "Доброй ночи!";
-        if (h < 12)
-            return "Доброе утро!";
-        if (h < 18)
-            return "Добрый день!";
-        if (h < 23)
-            return "Добрый вечер!";
-        return "Доброй ночи!";
-    }
-
-    function greetingSubtitle() {
-        const s = new Date().toLocaleDateString(Qt.locale("ru_RU"), "dddd, d MMMM");
-        return s.charAt(0).toUpperCase() + s.slice(1) + " · " + timeText;
-    }
-
-    Component.onCompleted: showNotice({ kind: "hello", title: greetingTitle(), subtitle: greetingSubtitle(), color: "#76a043" }, 3400)
+    Component.onCompleted: showNotice({ kind: "hello", title: "Привет", subtitle: "", color: Theme.accent }, 2600)
 
     Timer {
         running: true
@@ -378,6 +377,12 @@ Item {
             root.layoutShown = true;
             layoutTimer.restart();
         }
+    }
+
+    Timer {
+        id: leaveTimer
+        interval: 350
+        onTriggered: root.hoverHeld = false
     }
 
     Timer {
@@ -469,6 +474,10 @@ Item {
             HomeView {
                 anchors.fill: parent
                 anchors.topMargin: 44
+                active: root.showHome
+                overlay: root
+                onMenuOpenChanged: root.trayMenuOpen = menuOpen
+                onCardHoveredChanged: root.cardHovered = cardHovered
             }
         }
 
@@ -495,7 +504,7 @@ Item {
                         id: tabText
                         anchors.centerIn: parent
                         text: parent.modelData.label
-                        color: parent.selected ? "white" : "#9a9a9a"
+                        color: parent.selected ? Theme.accent : Theme.faint
                         font.family: Theme.fontFamily
                         font.pixelSize: 12
                         font.weight: Font.ExtraBold

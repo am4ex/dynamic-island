@@ -7,7 +7,7 @@ Item {
     property real volume: 0
     property bool muted: false
     readonly property real level: Math.max(0, Math.min(1, volume))
-    readonly property color accent: muted ? "#7a7a7a" : "white"
+    readonly property color accent: muted ? "#7a7a7a" : Theme.accent
 
     Shape {
         id: icon

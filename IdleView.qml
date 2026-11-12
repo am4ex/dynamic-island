@@ -34,7 +34,7 @@ Item {
         Text {
         anchors.verticalCenter: parent.verticalCenter
         text: root.timeText
-        color: "white"
+        color: Theme.accent
         font.family: Theme.fontFamily
         font.weight: Font.Bold
         font.pixelSize: 16

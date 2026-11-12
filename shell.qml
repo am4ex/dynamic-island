@@ -11,7 +11,7 @@ ShellRoot {
         anchors.top: true
         margins.top: 0
 
-        implicitWidth: 640
+        implicitWidth: 1240
         implicitHeight: 360
         color: "transparent"
 
@@ -21,16 +21,28 @@ ShellRoot {
         WlrLayershell.namespace: "dynamic-island"
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
-        Region {
-            id: islandRegion
-            item: island
-        }
+        mask: Region {
+            x: island.x
+            y: island.y
+            width: island.concealed ? 0 : island.width
+            height: island.concealed ? 0 : island.height
 
-        Region {
-            id: emptyRegion
-        }
+            Region {
+                readonly property Item card: island.leftCard
+                x: island.x + (card ? card.x : 0)
+                y: island.y + (card ? card.y : 0)
+                width: card && card.visible && !island.concealed ? card.width : 0
+                height: card && card.visible && !island.concealed ? card.height : 0
+            }
 
-        mask: island.concealed ? emptyRegion : islandRegion
+            Region {
+                readonly property Item card: island.rightCard
+                x: island.x + (card ? card.x : 0)
+                y: island.y + (card ? card.y : 0)
+                width: card && card.visible && !island.concealed ? card.width : 0
+                height: card && card.visible && !island.concealed ? card.height : 0
+            }
+        }
 
         Island {
             id: island

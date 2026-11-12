@@ -47,9 +47,9 @@ Item {
 
         ShapePath {
             strokeWidth: 2
-            strokeColor: "white"
+            strokeColor: Theme.accent
             joinStyle: ShapePath.RoundJoin
-            fillColor: "white"
+            fillColor: Theme.accent
             startX: tri.pointRight ? 0 : tri.width
             startY: 0
             PathLine { x: tri.pointRight ? tri.width : 0; y: tri.height / 2 }
@@ -71,7 +71,7 @@ Item {
         Rectangle {
             anchors.fill: parent
             radius: width / 2
-            color: "white"
+            color: Theme.accent
             opacity: area.pressed ? 0.2 : area.containsMouse ? 0.1 : 0
 
             Behavior on opacity {
@@ -131,7 +131,7 @@ Item {
             font.family: Theme.fontFamily
             font.weight: Font.Bold
             text: root.timeText
-            color: "white"
+            color: Theme.accent
             font.pixelSize: 17
             font.features: { "tnum": 1 }
         }
@@ -156,7 +156,7 @@ Item {
                 font.family: Theme.fontFamily
                 width: parent.width
                 text: root.player ? (root.player.trackTitle || "Неизвестный трек") : ""
-                color: "white"
+                color: Theme.accent
                 font.pixelSize: 15
                 font.weight: Font.ExtraBold
                 elide: Text.ElideRight
@@ -167,7 +167,7 @@ Item {
                 font.weight: Font.Bold
                 width: parent.width
                 text: root.player ? (root.player.trackArtist || "Неизвестный исполнитель") : ""
-                color: "#b0b0b0"
+                color: Theme.dim
                 font.pixelSize: 13
                 elide: Text.ElideRight
             }
@@ -181,7 +181,7 @@ Item {
             y: 90
             width: 36
             text: root.formatTime(root.position)
-            color: "#b0b0b0"
+            color: Theme.dim
             font.pixelSize: 11
             font.features: { "tnum": 1 }
         }
@@ -203,7 +203,7 @@ Item {
                 width: parent.width * ratio
                 height: parent.height
                 radius: parent.radius
-                color: "white"
+                color: Theme.accent
 
                 Behavior on width {
                     NumberAnimation { duration: 250; easing.type: Easing.Linear }
@@ -219,7 +219,7 @@ Item {
             width: 36
             horizontalAlignment: Text.AlignRight
             text: root.player && root.player.lengthSupported ? root.formatTime(root.player.length) : "--:--"
-            color: "#b0b0b0"
+            color: Theme.dim
             font.pixelSize: 11
             font.features: { "tnum": 1 }
         }
@@ -237,7 +237,7 @@ Item {
 
                 Row {
                     spacing: 1
-                    Rectangle { width: 3; height: 14; radius: 1; color: "white" }
+                    Rectangle { width: 3; height: 14; radius: 1; color: Theme.accent }
                     Triangle { pointRight: false }
                 }
             }
@@ -264,8 +264,8 @@ Item {
                         visible: root.playing
                         spacing: 5
                         x: 1
-                        Rectangle { width: 5; height: 18; radius: 1.5; color: "white" }
-                        Rectangle { width: 5; height: 18; radius: 1.5; color: "white" }
+                        Rectangle { width: 5; height: 18; radius: 1.5; color: Theme.accent }
+                        Rectangle { width: 5; height: 18; radius: 1.5; color: Theme.accent }
                     }
                 }
             }
@@ -278,7 +278,7 @@ Item {
                 Row {
                     spacing: 1
                     Triangle { pointRight: true }
-                    Rectangle { width: 3; height: 14; radius: 1; color: "white" }
+                    Rectangle { width: 3; height: 14; radius: 1; color: Theme.accent }
                 }
             }
         }
@@ -298,7 +298,7 @@ Item {
 
                 ShapePath {
                     strokeWidth: -1
-                    fillColor: "#d0d0d0"
+                    fillColor: Theme.dim
                     startX: 0; startY: 4
                     PathLine { x: 3; y: 4 }
                     PathLine { x: 7; y: 0 }
@@ -322,7 +322,7 @@ Item {
                     width: parent.width * Math.max(0, Math.min(1, root.playerVolume))
                     height: parent.height
                     radius: parent.radius
-                    color: "white"
+                    color: Theme.accent
                 }
             }
 
@@ -379,7 +379,7 @@ Item {
                         width: lyricColumn.width
                         text: modelData.text || "♪"
                         wrapMode: Text.WordWrap
-                        color: current ? "white" : "#909090"
+                        color: current ? Theme.accent : Theme.faint
                         opacity: Math.max(0.25, 1 - Math.abs(index - root.lyricIndex) * 0.28)
                         font.pixelSize: current ? 14 : 12
                         font.weight: current ? Font.ExtraBold : Font.Bold
@@ -397,7 +397,7 @@ Item {
                 anchors.centerIn: parent
                 visible: lyrics.lines.length === 0
                 text: lyrics.status === "loading" ? "Ищу текст…" : "Текст не найден"
-                color: "#8a8a8a"
+                color: Theme.faint
                 font.pixelSize: 12
             }
         }
@@ -426,7 +426,7 @@ Item {
                         id: chipText
                         anchors.centerIn: parent
                         text: parent.modelData.identity || "Плеер"
-                        color: parent.selected ? "white" : "#b0b0b0"
+                        color: parent.selected ? Theme.accent : Theme.dim
                         font.pixelSize: 11
                     }
 
@@ -466,7 +466,7 @@ Item {
             font.weight: Font.Bold
             anchors.centerIn: parent
             text: "♪"
-            color: "#9a9a9a"
+            color: Theme.faint
             font.pixelSize: cover.width * 0.55
             visible: root.artUrl === ""
         }

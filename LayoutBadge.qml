@@ -17,7 +17,7 @@ Rectangle {
         id: label
         anchors.centerIn: parent
         text: root.code
-        color: "#d0d0d0"
+        color: Theme.dim
         font.family: Theme.fontFamily
         font.weight: Font.ExtraBold
         font.pixelSize: 11

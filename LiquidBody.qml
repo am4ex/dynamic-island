@@ -17,8 +17,8 @@ Item {
     property real gradient: 0
     property real pull: 0
     property real pullX: 0
-    property color fillColor: "#000000"
-    property color edgeColor: "white"
+    property color fillColor: Theme.background
+    property color edgeColor: Theme.accent
     property real glow: 0
 
     readonly property real maxWave: 14
@@ -137,7 +137,7 @@ Item {
                 }
                 GradientStop {
                     position: 1
-                    color: Qt.rgba(root.edgeColor.r * 0.55 * root.gradient, root.edgeColor.g * 0.55 * root.gradient, root.edgeColor.b * 0.55 * root.gradient, 1)
+                    color: Qt.rgba(root.fillColor.r + (root.edgeColor.r * 0.55 - root.fillColor.r) * root.gradient, root.fillColor.g + (root.edgeColor.g * 0.55 - root.fillColor.g) * root.gradient, root.fillColor.b + (root.edgeColor.b * 0.55 - root.fillColor.b) * root.gradient, 1)
                 }
             }
             PathPolyline { path: root.outline }
@@ -162,8 +162,8 @@ Item {
                 x2: root.bodyWidth
                 y2: 0
                 GradientStop { position: 0; color: "transparent" }
-                GradientStop { position: root.fadeEnd; color: Qt.rgba(0, 0, 0, root.glow) }
-                GradientStop { position: 1 - root.fadeEnd; color: Qt.rgba(0, 0, 0, root.glow) }
+                GradientStop { position: root.fadeEnd; color: Qt.rgba(Theme.background.r, Theme.background.g, Theme.background.b, root.glow) }
+                GradientStop { position: 1 - root.fadeEnd; color: Qt.rgba(Theme.background.r, Theme.background.g, Theme.background.b, root.glow) }
                 GradientStop { position: 1; color: "transparent" }
             }
             PathPolyline { path: root.edge }
