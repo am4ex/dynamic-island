@@ -89,7 +89,8 @@ Item {
     }
     readonly property real fullRadius: 28
 
-    property real compactWidth: !born ? 44 : compactMode === "notice" ? (helloShown ? 190 : notice && notice.kind === "app" ? 380 : 340) : compactMode === "volume" ? 280 : compactMode === "layout" ? 200 : compactMode === "media" ? 270 : 200
+    property real compactWidth: !born ? 44 : compactMode === "notice" ? (helloShown ? 190 : notice && notice.kind === "app" ? 380 : 340) : compactMode === "volume" ? 280 : compactMode === "layout" ? 200 : compactMode === "media" ? 270 + root.privacyExtra : 200 + root.privacyExtra
+    readonly property real privacyExtra: (micActive ? 11 : 0) + (screenActive ? 11 : 0)
     property real compactHeight: !born ? 24 : compactMode === "notice" && !helloShown ? 50 : 38
     readonly property real compactRadius: compactHeight / 2
 
@@ -284,6 +285,17 @@ Item {
     readonly property string timeText: Qt.formatDateTime(clock.date, "h:mm AP")
 
     readonly property var streamNodes: Pipewire.nodes.values.filter(n => n.isStream && n.audio !== null && !n.isSink)
+    readonly property var captureCandidates: Pipewire.nodes.values.filter(n => n.isStream || n.type === PwNodeType.Untracked)
+    readonly property var ownCapture: ["cava", "plasmashell", "kwin_wayland", "quickshell", "xdg-desktop-portal-kde"]
+
+    readonly property bool micActive: captureCandidates.some(n => {
+        const p = n.properties;
+        return p && p["media.class"] === "Stream/Input/Audio" && p["stream.capture.sink"] !== "true" && p["stream.monitor"] !== "true" && ownCapture.indexOf(n.name) < 0;
+    })
+    readonly property bool screenActive: captureCandidates.some(n => {
+        const p = n.properties;
+        return p && p["media.class"] === "Stream/Input/Video" && ownCapture.indexOf(n.name) < 0;
+    })
 
     function norm(s) {
         return (s || "").toLowerCase().replace(/[^a-z0-9а-яё]/g, "");
@@ -481,10 +493,14 @@ Item {
             root.showNotice({ kind: "clip", title: "Скопировано", subtitle: clean || "Изображение или файл" }, 2500);
             root.winkCounter = root.winkCounter + 1;
         }
+        onScreenshot: path => {
+            root.showNotice({ kind: "shot", title: "Скриншот готов", subtitle: "Скопирован в буфер", image: "file://" + path }, 3500);
+            root.winkCounter = root.winkCounter + 1;
+        }
     }
 
     PwObjectTracker {
-        objects: [root.sink].concat(root.streamNodes)
+        objects: [root.sink].concat(root.streamNodes).concat(root.captureCandidates)
     }
 
     FrameAnimation {
@@ -609,6 +625,8 @@ Item {
                 anchors.fill: parent
                 timeText: root.timeText
                 layoutBadge: root.layoutBadge
+                micActive: root.micActive
+                screenActive: root.screenActive
                 cursorKnown: cursor.known
                 cursor: root.cursorLocal
                 sleeping: root.sleepy
@@ -629,6 +647,8 @@ Item {
                 expanded: root.playerOpen
                 timeText: root.timeText
                 layoutBadge: root.layoutBadge
+                micActive: root.micActive
+                screenActive: root.screenActive
                 cursorKnown: cursor.known
                 cursor: root.cursorLocal
                 eyesPleased: root.pleased

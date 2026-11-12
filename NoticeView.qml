@@ -106,8 +106,37 @@ Item {
         }
     }
 
+    ClippingRectangle {
+        id: shot
+        x: 12
+        anchors.verticalCenter: parent.verticalCenter
+        visible: root.kind === "shot"
+        width: Math.min(64, Math.max(24, height * (thumb.implicitWidth > 0 ? thumb.implicitWidth / thumb.implicitHeight : 1.6)))
+        height: 36
+        radius: 7
+        color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.12)
+        border.color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.35)
+        border.width: 1
+
+        Image {
+            id: thumb
+            anchors.fill: parent
+            source: root.kind === "shot" && root.notice.image ? root.notice.image : ""
+            sourceSize.height: 72
+            fillMode: Image.PreserveAspectCrop
+            asynchronous: true
+            cache: false
+            smooth: true
+            opacity: status === Image.Ready ? 1 : 0
+
+            Behavior on opacity {
+                NumberAnimation { duration: 200 }
+            }
+        }
+    }
+
     Column {
-        x: root.hello ? root.helloLeft + 40 : 58
+        x: root.hello ? root.helloLeft + 40 : root.kind === "shot" ? shot.x + shot.width + 12 : 58
         anchors.verticalCenter: parent.verticalCenter
         width: root.width - x - 16
         spacing: 1

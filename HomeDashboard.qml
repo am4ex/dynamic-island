@@ -15,6 +15,9 @@ Item {
     property var clipItems: []
     property real cpu: 0
     property real ram: 0
+    property real ramUsed: 0
+    property real ramTotal: 0
+    property bool clipPanel: false
     property real cpuTemp: 0
     property real gpu: 0
     property real gpuTemp: 0
@@ -38,6 +41,7 @@ Item {
     onHistoryPanelChanged: {
         if (historyPanel) {
             wifiPanel = false;
+            clipPanel = false;
             historyViewed();
         }
     }
@@ -51,6 +55,14 @@ Item {
     property bool customTimer: false
     readonly property bool wantsKeyboard: passwordFor !== "" || customTimer
 
+    onClipPanelChanged: {
+        if (clipPanel) {
+            wifiPanel = false;
+            historyPanel = false;
+            clipReader.running = true;
+        }
+    }
+
     onChoosingTimerChanged: if (!choosingTimer) customTimer = false
 
     function startTimer(seconds) {
@@ -62,8 +74,10 @@ Item {
     }
 
     onWifiPanelChanged: {
-        if (wifiPanel)
+        if (wifiPanel) {
             historyPanel = false;
+            clipPanel = false;
+        }
         passwordFor = "";
         wifiStatus = "";
         if (wifiPanel) {
@@ -200,6 +214,7 @@ Item {
             choosingTimer = false;
             wifiPanel = false;
             historyPanel = false;
+            clipPanel = false;
         }
     }
 
@@ -290,8 +305,11 @@ Item {
                         root.gpu = Number(p[1]);
                     }
                 }
-                if (memTotal > 0)
+                if (memTotal > 0) {
                     root.ram = Math.round(100 * (1 - memAvail / memTotal));
+                    root.ramUsed = (memTotal - memAvail) / 1048576;
+                    root.ramTotal = memTotal / 1048576;
+                }
             }
         }
     }
@@ -455,12 +473,59 @@ Item {
         }
     }
 
+    Row {
+        x: 262
+        y: 14
+        width: root.width - x - 22
+        visible: !root.wifiPanel && !root.historyPanel && !root.clipPanel
+
+        Repeater {
+            model: [
+                { label: "CPU", value: root.cpu + "%", sub: root.cpuTemp + "°" },
+                { label: "GPU", value: Math.round(root.gpu) + "%", sub: root.gpuTemp + "°" },
+                { label: "ОЗУ", value: root.ram + "%", sub: root.ramUsed.toFixed(1) + " / " + Math.round(root.ramTotal) + " ГБ" }
+            ]
+
+            Column {
+                required property var modelData
+                width: parent.width / 3
+                spacing: 1
+
+                Text {
+                    text: modelData.label
+                    color: Theme.faint
+                    font.family: Theme.fontFamily
+                    font.weight: Font.Bold
+                    font.pixelSize: 11
+                }
+
+                Text {
+                    text: modelData.value
+                    color: Theme.accent
+                    font.family: Theme.fontFamily
+                    font.weight: Font.ExtraBold
+                    font.pixelSize: 26
+                    font.features: { "tnum": 1 }
+                }
+
+                Text {
+                    text: modelData.sub
+                    color: Theme.dim
+                    font.family: Theme.fontFamily
+                    font.weight: Font.Bold
+                    font.pixelSize: 12
+                    font.features: { "tnum": 1 }
+                }
+            }
+        }
+    }
+
     Column {
         x: 262
         y: 10
         width: root.width - x - 22
         spacing: 2
-        visible: !root.wifiPanel && !root.historyPanel
+        visible: root.clipPanel
 
         Text {
             text: "Скопировано"
@@ -997,6 +1062,41 @@ Item {
                 }
             }
         }
+
+        RoundButton {
+            id: clipButton
+            on: root.clipPanel
+            onClicked: root.clipPanel = !root.clipPanel
+
+            Item {
+                width: 18
+                height: 18
+                readonly property color ink: clipButton.on ? Theme.background : Theme.accent
+
+                Rectangle {
+                    x: 2.5
+                    y: 2.5
+                    width: 13
+                    height: 15
+                    radius: 3
+                    color: "transparent"
+                    border.color: parent.ink
+                    border.width: 2
+                }
+
+                Rectangle {
+                    x: 5.5
+                    y: 0.5
+                    width: 7
+                    height: 4.5
+                    radius: 1.5
+                    color: parent.ink
+                }
+
+                Rectangle { x: 6; y: 9; width: 6; height: 2; radius: 1; color: parent.ink }
+                Rectangle { x: 6; y: 12.5; width: 4; height: 2; radius: 1; color: parent.ink }
+            }
+        }
     }
 
     Item {
@@ -1017,24 +1117,6 @@ Item {
                 font.family: Theme.fontFamily
                 font.weight: Font.ExtraBold
                 font.pixelSize: 13
-                font.features: { "tnum": 1 }
-            }
-
-            Text {
-                text: "CPU " + root.cpu + "% · " + root.cpuTemp + "°"
-                color: Theme.faint
-                font.family: Theme.fontFamily
-                font.weight: Font.Bold
-                font.pixelSize: 12
-                font.features: { "tnum": 1 }
-            }
-
-            Text {
-                text: "GPU " + Math.round(root.gpu) + "% · " + root.gpuTemp + "°"
-                color: Theme.faint
-                font.family: Theme.fontFamily
-                font.weight: Font.Bold
-                font.pixelSize: 12
                 font.features: { "tnum": 1 }
             }
 
@@ -1090,7 +1172,7 @@ Item {
 
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
-                width: 74
+                width: 104
                 height: 30
                 radius: 15
                 color: root.tint(0.1)
@@ -1119,7 +1201,7 @@ Item {
                 Text {
                     anchors.centerIn: parent
                     visible: customInput.text === ""
-                    text: "мин"
+                    text: "мин : сек"
                     color: Theme.faint
                     font.family: Theme.fontFamily
                     font.weight: Font.Bold
@@ -1127,13 +1209,35 @@ Item {
                 }
             }
 
-            Text {
+            Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
-                text: "например 7 или 2:30, Enter"
-                color: Theme.faint
-                font.family: Theme.fontFamily
-                font.weight: Font.Bold
-                font.pixelSize: 12
+                width: startText.implicitWidth + 24
+                height: 30
+                radius: 15
+                color: Theme.accent
+                opacity: customInput.text.replace(":", "") === "" ? 0.35 : startArea.containsMouse ? 0.85 : 1
+
+                Behavior on opacity {
+                    NumberAnimation { duration: 150 }
+                }
+
+                Text {
+                    id: startText
+                    anchors.centerIn: parent
+                    text: "Старт"
+                    color: Theme.background
+                    font.family: Theme.fontFamily
+                    font.weight: Font.ExtraBold
+                    font.pixelSize: 13
+                }
+
+                MouseArea {
+                    id: startArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: customInput.submit()
+                }
             }
         }
 
@@ -1143,7 +1247,7 @@ Item {
             visible: root.choosingTimer && !root.customTimer
 
             Repeater {
-                model: [5, 10, 15, 25, 45, 0]
+                model: [5, 10, 30, 0]
 
                 Item {
                     required property var modelData

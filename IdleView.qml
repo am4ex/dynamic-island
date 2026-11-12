@@ -5,6 +5,8 @@ Item {
 
     property string timeText: ""
     property string layoutBadge: ""
+    property bool micActive: false
+    property bool screenActive: false
     property bool cursorKnown: false
     property point cursor: Qt.point(0, 0)
     property bool sleeping: false
@@ -33,6 +35,12 @@ Item {
         anchors.rightMargin: 20
         anchors.verticalCenter: parent.verticalCenter
         spacing: 8
+
+        PrivacyDots {
+            anchors.verticalCenter: parent.verticalCenter
+            mic: root.micActive
+            screen: root.screenActive
+        }
 
         LayoutBadge {
             anchors.verticalCenter: parent.verticalCenter

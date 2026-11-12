@@ -12,6 +12,8 @@ Item {
     property bool expanded: false
     property string timeText: ""
     property string layoutBadge: ""
+    property bool micActive: false
+    property bool screenActive: false
     property bool cursorKnown: false
     property point cursor: Qt.point(0, 0)
     property bool eyesPleased: false
@@ -125,6 +127,12 @@ Item {
         spacing: 8
         opacity: Math.max(0, 1 - root.progress * 3)
         visible: opacity > 0
+
+        PrivacyDots {
+            anchors.verticalCenter: parent.verticalCenter
+            mic: root.micActive
+            screen: root.screenActive
+        }
 
         LayoutBadge {
             anchors.verticalCenter: parent.verticalCenter
