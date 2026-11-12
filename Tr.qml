@@ -66,7 +66,12 @@ Singleton {
         "Неизвестный трек": "Unknown track",
         "Неизвестный исполнитель": "Unknown artist",
         "Ищу текст…": "Looking for lyrics…",
-        "Текст не найден": "No lyrics found"
+        "Текст не найден": "No lyrics found",
+        "Вывод": "Output",
+        "Ввод": "Input",
+        "Устройства": "Devices",
+        "Сейчас ничего не играет": "Nothing is playing",
+        "Повысить максимальную громкость": "Raise maximum volume"
     })
 
     function t(s) {

@@ -120,7 +120,21 @@ Item {
         }
     }
 
-    readonly property bool paletteOpen: palettePopup.visible
+    property string rightMode: "palette"
+    readonly property bool paletteOpen: palettePopup.visible && rightMode === "palette"
+    readonly property bool audioOpen: palettePopup.visible && rightMode === "audio"
+
+    function toggleRight(mode) {
+        if (palettePopup.visible && rightMode === mode) {
+            palettePopup.visible = false;
+            return;
+        }
+        rightMode = mode;
+        if (palettePopup.visible)
+            palettePop.restart();
+        else
+            palettePopup.visible = true;
+    }
 
 
     component Swatch: Rectangle {
@@ -156,8 +170,8 @@ Item {
         visible: false
         x: (root.overlay ? root.overlay.width : 0) - 2
         y: -6
-        width: 268
-        height: 102
+        width: root.rightMode === "audio" ? 330 : 268
+        height: root.rightMode === "audio" ? audioCard.implicitHeight + 34 : 102
         onVisibleChanged: if (visible) palettePop.restart()
 
         HoverHandler {
@@ -192,11 +206,21 @@ Item {
                 }
             }
 
+            AudioCard {
+                id: audioCard
+                x: 24
+                y: 14
+                width: parent.width - 48
+                visible: root.rightMode === "audio"
+                active: root.audioOpen
+            }
+
             Column {
                 id: paletteColumn
                 x: 22
                 y: 20
                 spacing: 10
+                visible: root.rightMode === "palette"
 
                 Row {
                     spacing: 8
@@ -315,7 +339,46 @@ Item {
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            onClicked: palettePopup.visible = !palettePopup.visible
+            onClicked: root.toggleRight("palette")
+        }
+    }
+
+    Item {
+        id: audioButton
+        anchors.right: themeButton.left
+        anchors.rightMargin: 2
+        y: trayRow.y
+        width: 30
+        height: 30
+
+        Rectangle {
+            anchors.fill: parent
+            radius: 9
+            color: Theme.accent
+            opacity: audioArea.pressed ? 0.2 : audioArea.containsMouse || root.audioOpen ? 0.1 : 0
+
+            Behavior on opacity {
+                NumberAnimation { duration: 120 }
+            }
+        }
+
+        Item {
+            anchors.centerIn: parent
+            width: 18
+            height: 16
+
+            Rectangle { x: 1; y: 5; width: 4; height: 6; radius: 1; color: Theme.dim }
+            Rectangle { x: 4; y: 2; width: 6; height: 12; radius: 2; color: Theme.dim }
+            Rectangle { x: 12; y: 5; width: 2; height: 6; radius: 1; color: Theme.dim }
+            Rectangle { x: 15.5; y: 3; width: 2; height: 10; radius: 1; color: Theme.dim }
+        }
+
+        MouseArea {
+            id: audioArea
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: root.toggleRight("audio")
         }
     }
 

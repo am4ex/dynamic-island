@@ -10,6 +10,8 @@ Singleton {
     property string fontFamily: Qt.application.font.family
     property color accent: "white"
     property color background: "black"
+    property bool raiseVolume: false
+    readonly property real maxVolume: raiseVolume ? 1.5 : 1
     readonly property color dim: Qt.rgba(accent.r, accent.g, accent.b, 0.7)
     readonly property color faint: Qt.rgba(accent.r, accent.g, accent.b, 0.48)
     readonly property var palette: ["#ffffff", "#e5484d", "#f5a524", "#76a043", "#4c8ef7", "#a07cf0"]
@@ -25,8 +27,13 @@ Singleton {
         save();
     }
 
+    function setRaiseVolume(on) {
+        raiseVolume = on;
+        save();
+    }
+
     function save() {
-        store.setText(JSON.stringify({ accent: accent.toString(), background: background.toString() }));
+        store.setText(JSON.stringify({ accent: accent.toString(), background: background.toString(), raiseVolume: raiseVolume }));
     }
 
     FileView {
@@ -41,6 +48,7 @@ Singleton {
                     root.accent = saved.accent;
                 if (saved.background)
                     root.background = saved.background;
+                root.raiseVolume = saved.raiseVolume === true;
             } catch (e) {
                 return;
             }

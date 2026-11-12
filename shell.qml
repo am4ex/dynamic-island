@@ -11,7 +11,7 @@ ShellRoot {
         anchors.top: true
         margins.top: 0
 
-        implicitWidth: 1240
+        implicitWidth: 1400
         implicitHeight: 420
         color: "transparent"
 

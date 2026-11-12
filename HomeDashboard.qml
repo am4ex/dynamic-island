@@ -1351,7 +1351,7 @@ Item {
             color: root.tint(0.16)
 
             Rectangle {
-                width: parent.width * (root.sinkReady ? Math.min(1, root.sink.audio.volume) : 0)
+                width: parent.width * (root.sinkReady ? Math.min(1, root.sink.audio.volume / Theme.maxVolume) : 0)
                 height: parent.height
                 radius: parent.radius
                 color: Theme.accent
@@ -1363,7 +1363,7 @@ Item {
                 cursorShape: Qt.PointingHandCursor
                 function apply(mx) {
                     if (root.sinkReady)
-                        root.sink.audio.volume = Math.max(0, Math.min(1, (mx - 9) / volTrack.width));
+                        root.sink.audio.volume = Math.max(0, Math.min(1, (mx - 9) / volTrack.width)) * Theme.maxVolume;
                 }
                 onPressed: mouse => apply(mouse.x)
                 onPositionChanged: mouse => {
@@ -1372,7 +1372,7 @@ Item {
                 }
                 onWheel: wheel => {
                     if (root.sinkReady)
-                        root.sink.audio.volume = Math.max(0, Math.min(1, root.sink.audio.volume + (wheel.angleDelta.y > 0 ? 0.05 : -0.05)));
+                        root.sink.audio.volume = Math.max(0, Math.min(Theme.maxVolume, root.sink.audio.volume + (wheel.angleDelta.y > 0 ? 0.05 : -0.05)));
                 }
             }
         }
